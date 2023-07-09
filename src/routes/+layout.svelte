@@ -6,8 +6,8 @@
   <title>Cinemarc</title>
 </svelte:head>
 
-<slot />
-
 <style style="scss">
   @import "../styles/styles.scss";
 </style>
+
+<slot />

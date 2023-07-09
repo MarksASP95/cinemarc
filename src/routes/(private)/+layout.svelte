@@ -1,0 +1,13 @@
+<style>
+  .main-container {
+    padding: 0 20px;
+
+    @media (min-width: 768px) {
+      padding: 0 120px 40px;
+    }
+  }
+</style>
+
+<main class="main-container">
+  <slot />
+</main>
