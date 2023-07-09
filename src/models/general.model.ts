@@ -25,3 +25,9 @@ export interface FileUploaderSuccessOutput {
   newUploads: FileUploadOutput[];
   allUploads: FileUploadOutput[];
 }
+
+export interface Paged<T> {
+  data: T[];
+  page: number;
+  total: number;
+}

@@ -1,14 +1,22 @@
 import admin from "firebase-admin";
+import type { Paged } from "../../models/general.model";
 import type { Piece, PieceCreate, PieceEditable } from "../../models/piece.model";
 import { initializeFirebase } from "../firebase.server";
+import { paginateQuery } from "../utils.server";
 
 initializeFirebase();
 
-export function getPieces(): Promise<Piece[]> {
-  return admin.firestore().collection("pieces").where("isDeleted", "==", false).get()
-    .then((snap) => {
-      return snap.docs.map((doc) => doc.data() as Piece);
-    });
+const WELCOME_PAGE_PIECES_PAGE_SIZE = 10;
+
+export function getWelcomePagePieces(
+  page = 1, 
+  pageSize = WELCOME_PAGE_PIECES_PAGE_SIZE
+): Promise<Paged<Piece>> {
+  const query = admin.firestore()
+    .collection("pieces")
+    .where("isDeleted", "==", false);
+
+  return paginateQuery<Piece>(query, page, pageSize);
 }
 
 export function createPiece(pieceCr: PieceCreate): Promise<any> {
