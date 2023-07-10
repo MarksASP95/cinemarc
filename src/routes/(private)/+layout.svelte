@@ -1,6 +1,8 @@
 <style>
   .main-container {
     padding: 0 20px;
+    max-width: 1920px;
+    margin: 0 auto;
 
     @media (min-width: 768px) {
       padding: 0 120px 40px;
