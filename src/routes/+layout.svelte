@@ -1,4 +1,5 @@
 <script>
+  import { Modal, Toast } from "@skeletonlabs/skeleton";
   import "../app.postcss";
 </script>
 
@@ -11,3 +12,5 @@
 </style>
 
 <slot />
+<Modal />
+<Toast />
