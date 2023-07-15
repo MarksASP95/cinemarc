@@ -1,4 +1,4 @@
-import { json } from '@sveltejs/kit';
+import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { createInvitation } from '../../../../server/controllers/auth.controller';
 import type { CinemarcUserRank } from '../../../../models/user.model';
@@ -7,18 +7,18 @@ export const POST = (async (event) => {
   const { email, rank } = await event.request.json();
 
   if (typeof email !== "string") {
-    return json({ status: 400, message: "Email must be a string" });
+    throw error(400, { message: "Email must be a string" });
   }
   if (!email) {
-    return json({ status: 400, message: "Email is required" });
+    throw error(400, { message: "Email is required" });
   }
   if (!rank) {
-    return json({ status: 400, message: "Rank is required" });
+    throw error(400, { message: "Rank is required" });
   }
   try {
     (rank as any) satisfies CinemarcUserRank;
-  } catch (error) {
-    return json({ status: 400, message: "Rank value is not valid" });
+  } catch (e) {
+    throw error(400, { message: "Rank value is not valid" });
   }
 
   try {
