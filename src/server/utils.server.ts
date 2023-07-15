@@ -1,7 +1,10 @@
 import type admin from "firebase-admin";
 import type { DocumentData, Query } from "firebase/firestore";
+import type { Transporter } from "nodemailer";
+import { createTransport } from "nodemailer";
 import type { Paged } from "../models/general.model";
 import type { FirestoreTimestamp } from "../models/timestamp.model";
+import { EMAIL_USER, EMAIL_PASSWORD } from "$env/static/private";
 
 export function paginateQuery<T>(
   query: admin.firestore.Query, 
@@ -55,4 +58,14 @@ export function timestampToDate(value: any): Date | null {
   }
 
   return null;
+}
+
+export function getTransport(): Transporter {
+  return createTransport({
+    service: "gmail",
+    auth: {
+      user: EMAIL_USER,
+      pass: EMAIL_PASSWORD,
+    },
+  });
 }
