@@ -3,7 +3,7 @@ import type { FirestoreDocument } from "./firestore.model";
 export interface CinemarcUserCreate {
   username: string;
   email: string;
-  avatarUrl: null;
+  avatarUrl: string | null;
   rank: CinemarcUserRank;
 }
 
