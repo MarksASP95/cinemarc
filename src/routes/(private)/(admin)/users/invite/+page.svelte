@@ -49,7 +49,7 @@
           console.log(error);
         })
         .finally(() => {
-          invitingUser = true;
+          invitingUser = false;
         });
     }
   });
