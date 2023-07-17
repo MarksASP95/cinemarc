@@ -1,11 +1,20 @@
 <script lang="ts">
+  import { onDestroy } from "svelte";
   import PieceCard from "../../../client/components/PieceCard.svelte";
-import type { Paged } from "../../../models/general.model";
+  import Spinner from "../../../client/components/Spinner.svelte";
+  import { getPieces } from "../../../client/pieces/piece.fire";
   import type { Piece } from "../../../models/piece.model";
 
-  export let data: { pieces: Piece[] };
+  let pieces: Piece[] | null = null;
 
-  const pieces = data.pieces;
+  const pieces$ = getPieces((ps) => {
+    pieces = ps;
+  });
+
+  onDestroy(() => {
+    pieces$();
+  });
+  
 </script>
 
 <div class="search-bar my-8">
@@ -13,7 +22,13 @@ import type { Paged } from "../../../models/general.model";
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-  {#each pieces as piece}
-    <PieceCard {piece} />
-  {/each}
+  {#if !!pieces}
+    {#each pieces as piece}
+      <PieceCard {piece} />
+    {/each}
+  {:else}
+    <Spinner />
+  {/if}
+
+  
 </div>
