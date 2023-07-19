@@ -11,3 +11,5 @@ vite.config.ts.timestamp-*
 
 service-account.json
 .vercel
+
+.personal
