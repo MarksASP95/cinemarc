@@ -18,13 +18,14 @@
 </script>
 
 <div class="search-bar my-8">
-  <input class="input" type="text" placeholder="Search for a movie, series, podcast, or anything" />
+  <!-- svelte-ignore a11y-positive-tabindex -->
+  <input tabindex="1" class="input" type="text" placeholder="Search for a movie, series, podcast, or anything" />
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
   {#if !!pieces}
-    {#each pieces as piece}
-      <PieceCard {piece} />
+    {#each pieces as piece, index}
+      <PieceCard {piece} {index} />
     {/each}
   {:else}
     <Spinner />

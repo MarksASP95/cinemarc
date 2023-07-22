@@ -1,8 +1,10 @@
 <script lang="ts">
   import type { Piece, PieceSource } from "../../models/piece.model";
   import { pieceTypeDict } from "../../constants/piece.const";
+  import { popup, type PopupSettings } from "@skeletonlabs/skeleton";
 
   export let piece: Piece;
+  export let index: number;
 
   const FALLBACK_IMAGE_URL = "https://i.blogs.es/e652ca/harold-pain-meme/840_560.jpeg";
 
@@ -28,6 +30,16 @@
     if (imgEl.complete) {
       loadedImagesDict[id] = true;
     }
+  }
+
+  const piecePopup: PopupSettings = {
+    event: 'click',
+    target: piece.id,
+    placement: 'bottom',
+  };
+
+  function handleDoubleClick() {
+    console.log(piece.id);
   }
 </script>
 
@@ -96,7 +108,11 @@
   }
 </style>
 
-<a href="/" class="card bg-initial card-hover overflow-hidden piece-card">
+<div on:dblclick={handleDoubleClick} role="button" tabindex={index + 2} use:popup={piecePopup} class="card bg-initial relative piece-card cursor-pointer">
+  <div data-popup={piece.id} class="card p-4 w-72 shadow-xl z-10">
+    <div><p>{piece.name}</p></div>
+    <div class="arrow bg-surface-100-800-token" />
+  </div>
   <header 
     class="relative piece-card__header"
     class:piece-card__header--loaded={loadedImagesDict[piece.id]}
@@ -122,4 +138,4 @@
       </article>
     {/if}
   </div>
-</a>
+</div>
