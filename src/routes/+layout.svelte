@@ -3,6 +3,10 @@
   import "../app.postcss";
   import { listenToAuthChanges } from "../client/firebase/auth.fire";
   import { browser } from "$app/environment";
+  import { computePosition, autoUpdate, offset, shift, flip, arrow } from '@floating-ui/dom';
+  import { storePopup } from '@skeletonlabs/skeleton';
+  
+  storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
   
   if (browser) {
     listenToAuthChanges();
