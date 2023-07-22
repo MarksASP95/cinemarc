@@ -53,7 +53,7 @@
         description, 
         source,
         type,
-        url
+        release_date = null,
       } = values;
     
       const requiredFields = ["name", "source", "type"];
@@ -75,7 +75,8 @@
         name,
         source,
         type,
-      }
+        releaseDate: release_date,
+      };
 
       addPieceToDB(pieceCr)
     },
@@ -118,6 +119,14 @@
           );
           setFields("description", result.overview, true);
           setFields("type", $data.type || "movie", true);
+
+          const releaseDateStr = 
+            (result as TMDBMovieSearchOutputResult).release_date ||
+            (result as TMDBTVSearchOutputResult).first_air_date || 
+            null;
+          
+          setFields("release_date", releaseDateStr);
+
           foundImageUrl = `https://image.tmdb.org/t/p/original${result.poster_path}`;
           imageFile = null;
         } else {
@@ -223,6 +232,16 @@
           name="image" 
           class="input"  
           type="file" 
+        />
+      </label>
+      <label class="label">
+        <span>Release date (optional)</span>
+        <input 
+          disabled={creatingPiece}
+          accept=".png, .jpg, .jpeg"
+          name="release_date" 
+          class="input"  
+          type="date" 
         />
       </label>
       <footer class="modal-footer {parent.regionFooter}">

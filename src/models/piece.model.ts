@@ -12,10 +12,12 @@ export interface PieceCreate {
   type: PieceType;
   source: PieceSource;
   imageUrl: Nullable<string>;
+  releaseDate: Nullable<string>;
 }
 
 export interface Piece extends PieceCreate, FirestoreDocument {
   consumed: boolean;
+  smallImgUrl: Nullable<string>;
 }
 
 export type PieceEditable = Partial<Pick<Piece, 
