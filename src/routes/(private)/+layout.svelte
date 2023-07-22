@@ -14,13 +14,6 @@
   import { modalStore, toastStore } from '@skeletonlabs/skeleton';
   import type { ModalSettings, ModalComponent, ToastSettings } from '@skeletonlabs/skeleton';
   import PieceForm from './PieceForm.svelte';
-  import { onMount } from 'svelte';
-  
-  onMount(() => {
-    window.addEventListener("popstate", function listener() {
-      modalStore.clear();
-    });
-  });
 
   function handleFormSuccess() {
     modalStore.close();
