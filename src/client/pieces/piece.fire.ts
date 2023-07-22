@@ -31,7 +31,7 @@ export function createPiece(pieceCr: PieceCreate): Promise<any> {
     source: pieceCr.source,
     type: pieceCr.type,
     releaseDate: pieceCr.releaseDate,
-    thumbnailUrl: null, 
+    smallImgUrl: null, 
   };
   return setDoc(pieceDoc, piece);
 }
