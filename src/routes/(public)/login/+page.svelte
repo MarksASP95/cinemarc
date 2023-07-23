@@ -67,7 +67,6 @@
         name="email" 
         class="input"  
         type="email" 
-        autocomplete="off"
       />
       {#if formErrors.email}
         <small class="text-error-500">{formErrors.email}</small>
