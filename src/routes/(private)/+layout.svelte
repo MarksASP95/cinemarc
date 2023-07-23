@@ -14,6 +14,16 @@
   import { modalStore, toastStore } from '@skeletonlabs/skeleton';
   import type { ModalSettings, ModalComponent, ToastSettings } from '@skeletonlabs/skeleton';
   import PieceForm from './PieceForm.svelte';
+  import { onMount } from 'svelte';
+  import { authUser$ } from '../../auth/auth.store';
+  import type { CinemarcUser } from '../../models/user.model';
+
+  let currentUser: CinemarcUser | undefined | null;
+  onMount(() => {
+    authUser$.subscribe((user) => {
+      currentUser = user;
+    })
+  })
 
   function handleFormSuccess() {
     modalStore.close();
@@ -40,8 +50,10 @@
 </script>
 
 <main class="main-container">
-  <slot />
-  <button on:click={handlePlusButtonClick} type="button" class="btn-icon btn-icon-xl variant-filled fixed bottom-6 right-6">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="#000" width="24" height="24" viewBox="0 0 24 24"><path d="M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z"/></svg>
-  </button>
+  {#if !!currentUser}
+    <slot />
+    <button on:click={handlePlusButtonClick} type="button" class="btn-icon btn-icon-xl variant-filled fixed bottom-6 right-6">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="#000" width="24" height="24" viewBox="0 0 24 24"><path d="M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z"/></svg>
+    </button>
+  {/if}
 </main>

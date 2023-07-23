@@ -1,22 +1,40 @@
 import { goto } from "$app/navigation";
 import { collection, doc, getDoc } from "firebase/firestore";
-import { authUser$ } from "../../auth/auth.store";
+import { authUser$, jwtToken$ } from "../../auth/auth.store";
 import type { CinemarcUser } from "../../models/user.model";
 import { auth, firestore } from "./config.fire";
 
-// function fetchCurrentUser(uid: string): Promise<CinemarcUser> {
-//   const usersCol = collection(firestore, "users");
-//   doc
-// }
+function fetchCurrentUser(uid: string): Promise<CinemarcUser | null> {
+  const usersCol = collection(firestore, "users");
+  return getDoc(doc(usersCol, uid))
+    .then((userSnap) => {
+      if (!userSnap.exists) return null;
+      return userSnap.data() as CinemarcUser;
+    });
+}
 
 export function listenToAuthChanges() {
   auth.onAuthStateChanged(
     (authState) => {
       if (!authState) {
         authUser$.set(null);
+        jwtToken$.set(null);
         goto("/login");
         return;
       }
+
+      fetchCurrentUser(authState.uid)
+        .then((user) => {
+          authUser$.set(user);
+        })
+
+      authState.getIdToken()
+        .then((token) => {
+          jwtToken$.set(token);
+        })
+        .catch(() => {
+          jwtToken$.set(undefined);
+        });
 
 
     }

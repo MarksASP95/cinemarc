@@ -1,11 +1,19 @@
 <script lang="ts">
-  import { onDestroy } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import PieceCard from "../../../client/components/PieceCard.svelte";
   import Spinner from "../../../client/components/Spinner.svelte";
   import { getPieces } from "../../../client/pieces/piece.fire";
   import type { Piece } from "../../../models/piece.model";
+  import { authUser$ } from "../../../auth/auth.store";
+  import { get } from "svelte/store";
 
   let pieces: Piece[] | null = null;
+
+  onMount(() => {
+    authUser$.subscribe((user) => {
+      if (user === null) return;
+    })
+  })
 
   const pieces$ = getPieces((ps) => {
     pieces = ps;
