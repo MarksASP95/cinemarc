@@ -17,7 +17,7 @@ export function updatePiece(id: string, data: Partial<Piece>): Promise<any> {
   return updateDoc(pieceDoc, data);
 }
 
-export function createPiece(pieceCr: PieceCreate): Promise<any> {
+export function createPiece(pieceCr: PieceCreate): Promise<string> {
   const pieceDoc = doc(piecesCol);
   const piece: Piece = {
     consumed: false,
@@ -33,5 +33,6 @@ export function createPiece(pieceCr: PieceCreate): Promise<any> {
     releaseDate: pieceCr.releaseDate,
     smallImgUrl: null, 
   };
-  return setDoc(pieceDoc, piece);
+  return setDoc(pieceDoc, piece)
+    .then(() => pieceDoc.id);
 }

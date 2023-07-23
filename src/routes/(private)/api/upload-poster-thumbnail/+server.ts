@@ -5,7 +5,7 @@ import * as admin from "firebase-admin";
 import { error, json } from '@sveltejs/kit';
 
 export const POST = (async (event) => {
-  const { imgUrl, fileName } = await event.request.json();
+  const { imgUrl, fileName, pieceId } = await event.request.json();
   try {
     const res = await fetch(imgUrl);
     const blob = await res.blob();
@@ -23,7 +23,15 @@ export const POST = (async (event) => {
     await storageFile.save(resizedImgBuffer);
     await storageFile.makePublic();
     const url = storageFile.publicUrl();
-    return json({ url });
+    
+    admin.firestore()
+      .collection("pieces")
+      .doc(pieceId)
+      .update({
+        smallImgUrl: url,
+      });
+
+    return json({ url, pieceId });
   } catch (err: any){
     throw error(500, { message: err.message });
   }

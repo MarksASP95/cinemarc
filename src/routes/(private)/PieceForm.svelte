@@ -38,7 +38,17 @@
         pieceCr.imageUrl = imageUrl || foundImageUrl || null;
         return createPiece(pieceCr);
       })
-      .then(() => success())
+      .then((pieceId) => {
+        fetch("/api/upload-poster-thumbnail", {
+          method: "POST",
+          body: JSON.stringify({
+            imgUrl: pieceCr.imageUrl,
+            fileName: pieceCr.name,
+            pieceId,
+          }),
+        });
+        success();
+      })
       .catch((err) => {
         console.log("Error creating piece", err);
         handleFormError();
@@ -79,6 +89,7 @@
       };
 
       addPieceToDB(pieceCr)
+
     },
     onError: (e) => {
       console.log("Error was", e)
