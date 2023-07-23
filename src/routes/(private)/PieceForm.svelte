@@ -3,9 +3,10 @@
   import { createForm } from "felte";
   import { uploadFile } from '../../client/firebase/storage.fire';
   import type { PieceCreate } from '../../models/piece.model';
-  import { createPiece } from '../../client/pieces/piece.fire';
+  import { createPiece, updatePiece } from '../../client/pieces/piece.fire';
   import Spinner from '../../client/components/Spinner.svelte';
   import type { TMDBMovieSearchOutput, TMDBMovieSearchOutputResult, TMDBTVSearchOutput, TMDBTVSearchOutputResult } from '../../models/tmdb.model';
+  import { generatePosterSmallImg } from '../../client/pieces/pieces.api';
 
   export let parent: any;
   export let success: Function;
@@ -39,14 +40,7 @@
         return createPiece(pieceCr);
       })
       .then((pieceId) => {
-        fetch("/api/upload-poster-thumbnail", {
-          method: "POST",
-          body: JSON.stringify({
-            imgUrl: pieceCr.imageUrl,
-            fileName: pieceCr.name,
-            pieceId,
-          }),
-        });
+        pieceCr.imageUrl && generatePosterSmallImg(pieceCr.imageUrl, pieceCr.name, pieceId);
         success();
       })
       .catch((err) => {

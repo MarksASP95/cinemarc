@@ -3,11 +3,12 @@ import type { ColSnapshotCallback, ValueCallback } from "../../models/general.mo
 import type { Piece, PieceCreate } from "../../models/piece.model";
 import { firestore } from "../firebase/config.fire";
 import { generateId, subscribeTo, valueCollectionSnap } from "../firebase/docs.fire";
+import { get } from 'svelte/store';
+import { authUser$ } from "../../auth/auth.store";
 
 const piecesCol = collection(firestore, "pieces") as CollectionReference<Piece>;
 
 export function getPieces(onValue: ValueCallback<Piece[]>) {
-  // TODO: agregar where ownerId
   const q = query(piecesCol)
   return valueCollectionSnap(q, onValue);
 }
@@ -18,6 +19,11 @@ export function updatePiece(id: string, data: Partial<Piece>): Promise<any> {
 }
 
 export function createPiece(pieceCr: PieceCreate): Promise<string> {
+  const currentUser = get(authUser$);
+  if (!currentUser) throw "Unauthenticated";
+
+  const { id: ownerId } = currentUser;
+
   const pieceDoc = doc(piecesCol);
   const piece: Piece = {
     consumed: false,
@@ -32,6 +38,7 @@ export function createPiece(pieceCr: PieceCreate): Promise<string> {
     type: pieceCr.type,
     releaseDate: pieceCr.releaseDate,
     smallImgUrl: null, 
+    ownerId,
   };
   return setDoc(pieceDoc, piece)
     .then(() => pieceDoc.id);

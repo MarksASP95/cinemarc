@@ -18,6 +18,9 @@ export interface PieceCreate {
 export interface Piece extends PieceCreate, FirestoreDocument {
   consumed: boolean;
   smallImgUrl: Nullable<string>;
+
+  // TODO: deberia ponerse en el servidor con un trigger
+  ownerId: string;
 }
 
 export type PieceEditable = Partial<Pick<Piece, 
