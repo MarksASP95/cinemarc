@@ -1,6 +1,6 @@
-import { addDoc, collection, CollectionReference, doc, documentId, getDoc, onSnapshot, Query, query, serverTimestamp, setDoc, updateDoc, where, type DocumentData } from "firebase/firestore";
+import { addDoc, collection, CollectionReference, doc, documentId, getDoc, onSnapshot, Query, query, QueryFieldFilterConstraint, serverTimestamp, setDoc, updateDoc, where, type DocumentData } from "firebase/firestore";
 import type { ColSnapshotCallback, ValueCallback } from "../../models/general.model";
-import type { Piece, PieceCreate } from "../../models/piece.model";
+import type { Piece, PieceCreate, PieceFixedValueFilter } from "../../models/piece.model";
 import { firestore } from "../firebase/config.fire";
 import { generateId, subscribeTo, valueCollectionSnap } from "../firebase/docs.fire";
 import { get } from 'svelte/store';
@@ -8,8 +8,30 @@ import { authUser$ } from "../../auth/auth.store";
 
 const piecesCol = collection(firestore, "pieces") as CollectionReference<Piece>;
 
-export function getPieces(onValue: ValueCallback<Piece[]>) {
-  const q = query(piecesCol)
+export function getPieces(onValue: ValueCallback<Piece[]>, filter: PieceFixedValueFilter = {}) {
+  const user = get(authUser$);
+  if (!user) throw "No current user";
+
+  const usedFilter: PieceFixedValueFilter = {
+    consumed: false,
+    isDeleted: false,
+    ...filter,
+  };
+  
+  const constraints: QueryFieldFilterConstraint[] = [
+    where("ownerId", "==", user.id),
+  ];
+
+  if (usedFilter.consumed !== undefined) 
+    constraints.push(where("consumed", "==", usedFilter.consumed));
+  if (usedFilter.isDeleted !== undefined)
+    constraints.push(where("isDeleted", "==", usedFilter.isDeleted));
+  if (usedFilter.source !== undefined)
+    constraints.push(where("source", "==", usedFilter.source));
+  if (usedFilter.type !== undefined)
+    constraints.push(where("type", "==", usedFilter.type));
+
+  const q = query(piecesCol, ...constraints);
   return valueCollectionSnap(q, onValue);
 }
 

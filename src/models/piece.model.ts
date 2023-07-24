@@ -33,3 +33,8 @@ export type PieceEditable = Partial<Pick<Piece,
   "source" | 
   "type"
 >>;
+
+type PieceFixedValueFilterKeys = Pick<Piece, "consumed" | "isDeleted" | "source" | "type">;
+export type PieceFixedValueFilter = {
+  [P in keyof Partial<PieceFixedValueFilterKeys>]: Piece[P] | undefined;
+}

@@ -1,7 +1,8 @@
 <script lang="ts">
-  import type { Piece, PieceSource } from "../../models/piece.model";
+  import type { Piece, PieceSource, PieceType } from "../../models/piece.model";
   import { pieceTypeDict } from "../../constants/piece.const";
   import { popup, type PopupSettings } from "@skeletonlabs/skeleton";
+  import { updatePiece } from "../pieces/piece.fire";
 
   export let piece: Piece;
   export let index: number;
@@ -23,6 +24,18 @@
     mubi: "cinemarc-badge mubi",
   };
 
+  const settingConsumedStateDict: Record<string, boolean> = {};
+
+  const consumedStateTextyPieceType: Record<PieceType, [string, string]> = {
+    book: ["Mark as read", "Mark as not read"],
+    documentary: ["Mark as watched", "Mark as not watched"],
+    movie: ["Mark as watched", "Mark as not watched"],
+    music: ["Mark as listened", "Mark as not listened"],
+    podcast: ["Mark as listened", "Mark as not listened"],
+    series: ["Mark as watched", "Mark as not watched"],
+    video: ["Mark as watched", "Mark as not watched"],
+  };
+
   const loadedImagesDict: Record<string, boolean> = {};
 
   function handlePieceImageLoaded(e: Event, id: string) {
@@ -35,11 +48,17 @@
   const piecePopup: PopupSettings = {
     event: 'click',
     target: piece.id,
-    placement: 'bottom',
+    placement: 'right',
   };
 
   function handleDoubleClick() {
     console.log(piece.id);
+  }
+
+  function setPieceConsumedState(pieceId: string, newState: boolean) {
+    settingConsumedStateDict[pieceId] = true;
+    updatePiece(pieceId, { consumed: newState })
+      .finally(() => settingConsumedStateDict[pieceId] = false);
   }
 </script>
 
@@ -109,9 +128,30 @@
 </style>
 
 <div on:dblclick={handleDoubleClick} role="button" tabindex={index + 2} use:popup={piecePopup} class="card bg-initial relative piece-card cursor-pointer">
-  <div data-popup={piece.id} class="card p-4 w-72 shadow-xl z-10">
-    <div><p>{piece.name}</p></div>
+  <div data-popup={piece.id} class="card p-4 w-72 variant-glass-success shadow-xl z-10">
     <div class="arrow bg-surface-100-800-token" />
+    <p class="h4 mb-4">{piece.name}</p>
+    <div class="flex justify-center">
+      <button 
+        type="button" 
+        class:variant-filled-tertiary={!piece.consumed} 
+        class:variant-filled-error={piece.consumed}
+        class="btn btn-sm variant-filled mr-1"
+        on:click={() => setPieceConsumedState(piece.id, !piece.consumed)}
+        disabled={settingConsumedStateDict[piece.id]}
+      >
+        { consumedStateTextyPieceType[piece.type][+piece.consumed] } &nbsp;
+        {#if piece.consumed}
+          👈
+        {:else}
+          ✅
+        {/if}
+      </button>
+
+      <button type="button" class="btn variant-filled-secondary btn-sm">
+        Edit ✏️
+      </button>
+    </div>
   </div>
   <header 
     class="relative piece-card__header"
