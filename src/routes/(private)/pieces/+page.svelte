@@ -7,7 +7,17 @@
   import { authUser$ } from "../../../auth/auth.store";
   import { get } from "svelte/store";
 
+  let searchStr = ""
+  let searchInputEl: HTMLInputElement;
+
   let pieces: Piece[] | null = null;
+  $: displayedPieces = filterPiecesBySearch(searchStr, pieces);
+
+  function filterPiecesBySearch(_searchStr: string, pieces: Piece[] | null): Piece[] | null {
+    if (!pieces) return null;
+    if (!searchStr) return pieces;
+    return pieces.filter((piece) => piece.name.toLocaleLowerCase().includes(_searchStr));
+  }
 
   onMount(() => {
     authUser$.subscribe((user) => {
@@ -22,22 +32,55 @@
   onDestroy(() => {
     pieces$();
   });
+
+  function handleSearchSubmit(e: any) {
+    if (e.key !== "Enter") return;
+    searchStr = e.target.value;
+  }
+
+  function clearSearch() {
+    searchStr = "";
+    searchInputEl.value = "";
+  }
   
 </script>
 
+<style>
+  .clear-search-button {
+    max-width: 200px;
+  }
+</style>
+
 <div class="search-bar my-8">
   <!-- svelte-ignore a11y-positive-tabindex -->
-  <input tabindex="1" class="input" type="text" placeholder="Search for a movie, series, podcast, or anything" />
+  <input 
+    bind:this={searchInputEl}
+    on:keyup={handleSearchSubmit}
+    autocomplete="off" 
+    id="piece-search-input" 
+    tabindex="1" 
+    class="input" 
+    type="text" 
+    placeholder="Search for a movie, series, podcast, or anything" 
+  />
 </div>
 
+{#if !!displayedPieces && !!searchStr}
+  <div class="flex justify-center">
+    <button on:click={clearSearch} type="button" class="btn w-full max-w-xs btn-sm variant-filled clear-search-button">
+      Clear search
+    </button>
+  </div>
+{/if}
+
 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-  {#if !!pieces}
-    {#each pieces as piece, index}
+  {#if !!displayedPieces}
+
+
+    {#each displayedPieces as piece, index}
       <PieceCard {piece} {index} />
     {/each}
   {:else}
     <Spinner />
   {/if}
-
-  
 </div>
