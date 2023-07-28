@@ -125,12 +125,20 @@
       color: #fff;
     }
   }
+
+  .popup-positioning {
+    left: 50% !important; 
+    top: 10px !important; 
+    transform: translate(-50%, 0) !important;
+  }
 </style>
 
 <div on:dblclick={handleDoubleClick} role="button" tabindex={index + 2} use:popup={piecePopup} class="card bg-initial relative piece-card cursor-pointer">
-  <div data-popup={piece.id} class="card p-4 w-72 variant-glass-success shadow-xl z-10">
-    <div class="arrow bg-surface-100-800-token" />
-    <p class="h4 mb-4">{piece.name}</p>
+  <div 
+    data-popup={piece.id} class="card p-4 w-72 bg-gradient-to-br variant-gradient-success-warning shadow-xl z-10 popup-positioning"
+  >
+    <!-- <div class="arrow bg-surface-100-800-token" /> -->
+    <p class="h4 mb-4 font-medium">{piece.name}</p>
     <div class="flex justify-center">
       <button 
         type="button" 
