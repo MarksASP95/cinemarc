@@ -2,55 +2,50 @@
 	import { Toast, modalStore, toastStore, type ToastSettings } from '@skeletonlabs/skeleton';
   import { createForm } from "felte";
   import { uploadFile } from '../../client/firebase/storage.fire';
-  import type { PieceCreate } from '../../models/piece.model';
+  import type { Piece, PieceCreate, PieceEditable } from '../../models/piece.model';
   import { createPiece, updatePiece } from '../../client/pieces/piece.fire';
   import Spinner from '../../client/components/Spinner.svelte';
   import type { TMDBMovieSearchOutput, TMDBMovieSearchOutputResult, TMDBTVSearchOutput, TMDBTVSearchOutputResult } from '../../models/tmdb.model';
   import { generatePosterSmallImg } from '../../client/pieces/pieces.api';
+  import { onMount } from 'svelte';
 
   export let parent: any;
   export let success: Function;
+  export let pieceToEdit: Piece | undefined = undefined;
 
   let formErrors: Record<string, string> = {};
-  let creatingPiece = false;
+  let submittingPiece = false;
   let imageFile: File | null;
   let searchingMovie = false;
   let foundImageUrl: string | null = null;
 
-  function handleFormError() {
-    const t: ToastSettings = {
-      message: 'Something went wrong 😕',
-      background: 'variant-filled-error',
-    };
-    toastStore.trigger(t);
-  }
-
-  function addPieceToDB(pieceCr: PieceCreate) {
-    creatingPiece = true;
-
+  function updatePieceToDB(data: PieceEditable) {
+    submittingPiece = true;
+    
     let uploadImageFile: Promise<string | null> = Promise.resolve(null);
     if (imageFile) {
-      const filePath = `movie_images/${new Date().getTime()}_${imageFile.name}`;
-      uploadImageFile = uploadFile(filePath, imageFile).then(({ url }) => url);
+      uploadImageFile = uploadMovieImage(imageFile);
     }
 
     uploadImageFile
       .then((imageUrl) => {
-        pieceCr.imageUrl = imageUrl || foundImageUrl || null;
-        return createPiece(pieceCr);
+        data.imageUrl = imageUrl || foundImageUrl || null;
+        return updatePiece(pieceToEdit!.id, data);
       })
       .then((pieceId) => {
-        pieceCr.imageUrl && generatePosterSmallImg(pieceCr.imageUrl, pieceCr.name, pieceId);
+        if (data.imageUrl !== pieceToEdit?.imageUrl) {
+          data.imageUrl && generatePosterSmallImg(data.imageUrl, data.name!, pieceId);
+        }
         success();
       })
       .catch((err) => {
-        console.log("Error creating piece", err);
+        console.log("Error updating piece", err);
         handleFormError();
       })
-      .finally(() => creatingPiece = false);
+      .finally(() => submittingPiece = false);
   }
 
-	const { form: pieceForm, data, setFields } = createForm({
+  const { form: pieceForm, data, setFields } = createForm({
     onSubmit: (values) => {
       const {
         name,
@@ -73,22 +68,82 @@
       }
       formErrors = {};
 
-      const pieceCr: PieceCreate = {
-        description: description || null,
-        imageUrl: null,
-        name,
-        source,
-        type,
-        releaseDate: release_date,
-      };
+      if (!!pieceToEdit) { // edit
+        const pieceUpdateData: PieceEditable = {
+          description,
+          name,
+          source,
+          type,
+        };
 
-      addPieceToDB(pieceCr)
+        updatePieceToDB(pieceUpdateData);
+      } else { // create
+        const pieceCr: PieceCreate = {
+          description: description || null,
+          imageUrl: null,
+          name,
+          source,
+          type,
+          releaseDate: release_date,
+        };
+  
+        addPieceToDB(pieceCr)
+      }
+
 
     },
     onError: (e) => {
       console.log("Error was", e)
     }
-  })
+  });
+
+  onMount(() => {
+    if (!!pieceToEdit) {
+      setFields("name", pieceToEdit.name)
+      setFields("description", pieceToEdit.description)
+      setFields("type", pieceToEdit.type)
+      setFields("source", pieceToEdit.source)
+      foundImageUrl = pieceToEdit.imageUrl;
+      setFields("release_date", pieceToEdit.releaseDate)
+    }
+  });
+
+  function handleFormError() {
+    const t: ToastSettings = {
+      message: 'Something went wrong 😕',
+      background: 'variant-filled-error',
+    };
+    toastStore.trigger(t);
+  }
+
+  function uploadMovieImage(file: File) {
+    const filePath = `movie_images/${new Date().getTime()}_${file.name}`;
+    return uploadFile(filePath, file).then(({ url }) => url);
+  }
+
+  function addPieceToDB(pieceCr: PieceCreate) {
+    submittingPiece = true;
+
+    let uploadImageFile: Promise<string | null> = Promise.resolve(null);
+    if (imageFile) {
+      uploadImageFile = uploadMovieImage(imageFile);
+    }
+
+    uploadImageFile
+      .then((imageUrl) => {
+        pieceCr.imageUrl = imageUrl || foundImageUrl || null;
+        return createPiece(pieceCr);
+      })
+      .then((pieceId) => {
+        pieceCr.imageUrl && generatePosterSmallImg(pieceCr.imageUrl, pieceCr.name, pieceId);
+        success();
+      })
+      .catch((err) => {
+        console.log("Error creating piece", err);
+        handleFormError();
+      })
+      .finally(() => submittingPiece = false);
+  }
   
   function findMovieOnTMDB() {
     searchingMovie = true;
@@ -157,14 +212,20 @@
 <Toast />
 {#if $modalStore[0]}
 	<div class="modal-example-form {cBase}">
-    <header class={cHeader}>New Piece yay!</header>
+    <header class={cHeader}>
+      {#if !pieceToEdit}
+        New Piece yay!
+      {:else}
+        Edit "{ pieceToEdit.name }"
+      {/if}
+    </header>
     <form use:pieceForm class="modal-form {cForm}">
       <label class="label">
         <span>Name</span>
         <div class="flex">
           <div class="flex-1 mr-2">
             <input 
-              disabled={creatingPiece}
+              disabled={submittingPiece}
               name="name" 
               class="input"  
               type="text" 
@@ -182,7 +243,7 @@
       <label class="label">
         <span>Description (optional)</span>
         <textarea 
-          disabled={creatingPiece}
+          disabled={submittingPiece}
           class="textarea" 
           name="description" 
           id="" rows="3"
@@ -190,7 +251,7 @@
       </label>
       <label class="label">
         <span>Type</span>
-        <select name="type" class="select" disabled={creatingPiece}>
+        <select name="type" class="select" disabled={submittingPiece}>
           <option value="" selected disabled>Select a type</option>
           <option value="movie">Movie</option>
           <option value="series">Series</option>
@@ -206,7 +267,7 @@
       </label>
       <label class="label">
         <span>Source</span>
-        <select name="source" class="select" disabled={creatingPiece}>
+        <select name="source" class="select" disabled={submittingPiece}>
           <option value="" selected disabled>Select a source</option>
           <option value="netflix">Netflix</option>
           <option value="youtube">Youtube</option>
@@ -231,7 +292,7 @@
       <label class="label">
         <span>Image (optional)</span>
         <input 
-          disabled={creatingPiece}
+          disabled={submittingPiece}
           accept=".png, .jpg, .jpeg"
           on:change={handleImageInputChange}
           name="image" 
@@ -242,7 +303,7 @@
       <label class="label">
         <span>Release date (optional)</span>
         <input 
-          disabled={creatingPiece}
+          disabled={submittingPiece}
           accept=".png, .jpg, .jpeg"
           name="release_date" 
           class="input"  
@@ -251,11 +312,11 @@
       </label>
       <footer class="modal-footer {parent.regionFooter}">
           <!-- <button class="btn {parent.buttonNeutral}" on:click={parent.onClose}>{parent.buttonTextCancel}</button> -->
-          <button disabled={creatingPiece} class="btn {parent.buttonPositive}" type="submit">
-            {#if creatingPiece}
+          <button disabled={submittingPiece} class="btn {parent.buttonPositive}" type="submit">
+            {#if submittingPiece}
               <Spinner forButton />
             {:else}
-              Create
+              { pieceToEdit ? "Update" : "Create" }
             {/if}
           </button>
       </footer>

@@ -3,9 +3,16 @@
   import { pieceTypeDict } from "../../constants/piece.const";
   import { popup, type PopupSettings } from "@skeletonlabs/skeleton";
   import { updatePiece } from "../pieces/piece.fire";
+  import { createEventDispatcher } from "svelte";
 
   export let piece: Piece;
   export let index: number;
+
+  const dispatch = createEventDispatcher<{ editButtonClick: Piece }>();
+
+  function handleEditButtonClick() {
+    dispatch("editButtonClick", piece);
+  }
 
   const FALLBACK_IMAGE_URL = "https://i.blogs.es/e652ca/harold-pain-meme/840_560.jpeg";
 
@@ -156,7 +163,7 @@
         {/if}
       </button>
 
-      <button type="button" class="btn variant-filled-secondary btn-sm">
+      <button on:click={handleEditButtonClick} type="button" class="btn variant-filled-secondary btn-sm">
         Edit ✏️
       </button>
     </div>

@@ -1,6 +1,6 @@
 import { addDoc, collection, CollectionReference, doc, documentId, getDoc, onSnapshot, Query, query, QueryFieldFilterConstraint, serverTimestamp, setDoc, updateDoc, where, type DocumentData } from "firebase/firestore";
 import type { ColSnapshotCallback, ValueCallback } from "../../models/general.model";
-import type { Piece, PieceCreate, PieceFixedValueFilter } from "../../models/piece.model";
+import type { Piece, PieceCreate, PieceEditable, PieceFixedValueFilter } from "../../models/piece.model";
 import { firestore } from "../firebase/config.fire";
 import { generateId, subscribeTo, valueCollectionSnap } from "../firebase/docs.fire";
 import { get } from 'svelte/store';
@@ -35,7 +35,7 @@ export function getPieces(onValue: ValueCallback<Piece[]>, filter: PieceFixedVal
   return valueCollectionSnap(q, onValue);
 }
 
-export function updatePiece(id: string, data: Partial<Piece>): Promise<any> {
+export function updatePiece(id: string, data: PieceEditable): Promise<any> {
   const pieceDoc = doc(piecesCol, id);
   return updateDoc(pieceDoc, data);
 }

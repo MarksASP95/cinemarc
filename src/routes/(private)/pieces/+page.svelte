@@ -6,6 +6,8 @@
   import type { Piece } from "../../../models/piece.model";
   import { authUser$ } from "../../../auth/auth.store";
   import { get } from "svelte/store";
+  import { modalStore, type ModalComponent, type ModalSettings, type ToastSettings, toastStore } from "@skeletonlabs/skeleton";
+  import PieceForm from "../PieceForm.svelte";
 
   let searchStr = ""
   let searchInputEl: HTMLInputElement;
@@ -41,6 +43,32 @@
   function clearSearch() {
     searchStr = "";
     searchInputEl.value = "";
+  }
+
+  function handleFormSuccess() {
+    modalStore.close();
+    const t: ToastSettings = {
+      message: 'Piece updated! 🎉',
+      background: 'variant-filled-success',
+    };
+    toastStore.trigger(t);
+  }
+
+  function openEditModal(e: CustomEvent<Piece>) {
+    const { detail: piece } = e;
+
+    const formModalComponent: ModalComponent = {
+      ref: PieceForm,
+      props: {
+        success: handleFormSuccess,
+        pieceToEdit: piece,
+      },
+    }
+    const formModal: ModalSettings = {
+      type: "component",
+      component: formModalComponent,
+    }
+    modalStore.trigger(formModal);
   }
   
 </script>
@@ -78,7 +106,7 @@
 
 
     {#each displayedPieces as piece, index}
-      <PieceCard {piece} {index} />
+      <PieceCard on:editButtonClick={openEditModal} {piece} {index} />
     {/each}
   {:else}
     <Spinner />
