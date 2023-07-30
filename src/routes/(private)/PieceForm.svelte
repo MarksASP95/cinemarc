@@ -18,6 +18,11 @@
   let imageFile: File | null;
   let searchingMovie = false;
   let foundImageUrl: string | null = null;
+  let fromResultMap: Record<string, boolean> = {
+    name: false,
+    description: false,
+    release_date: false,
+  };
 
   function updatePieceToDB(data: PieceEditable) {
     submittingPiece = true;
@@ -144,6 +149,39 @@
       })
       .finally(() => submittingPiece = false);
   }
+
+  function handleMovieFetchResponseData(
+    type: string, 
+    data: TMDBMovieSearchOutput | TMDBTVSearchOutput
+  ) {
+    let result = data.results[0];
+    setFields(
+      "name", 
+      type === "movie" ? 
+        (result as TMDBMovieSearchOutputResult).original_title 
+        :
+        (result as TMDBTVSearchOutputResult).name,
+      true
+    );
+    setFields("description", result.overview, true);
+    setFields("type", $data.type || "movie", true);
+
+    const releaseDateStr = 
+      (result as TMDBMovieSearchOutputResult).release_date ||
+      (result as TMDBTVSearchOutputResult).first_air_date || 
+      null;
+    
+    setFields("release_date", releaseDateStr);
+
+    foundImageUrl = `https://image.tmdb.org/t/p/original${result.poster_path}`;
+    imageFile = null;
+
+    fromResultMap = {
+      name: true,
+      description: true,
+      release_date: true,
+    };
+  }
   
   function findMovieOnTMDB() {
     searchingMovie = true;
@@ -166,29 +204,8 @@
     })
       .then((res) => res.json())
       .then(({ data }: { data: TMDBMovieSearchOutput | TMDBTVSearchOutput }) => {
-        console.log(data)
-        let result = data.results[0];
-        if (result) {
-          setFields(
-            "name", 
-            type === "movie" ? 
-              (result as TMDBMovieSearchOutputResult).original_title 
-              :
-              (result as TMDBTVSearchOutputResult).name,
-            true
-          );
-          setFields("description", result.overview, true);
-          setFields("type", $data.type || "movie", true);
-
-          const releaseDateStr = 
-            (result as TMDBMovieSearchOutputResult).release_date ||
-            (result as TMDBTVSearchOutputResult).first_air_date || 
-            null;
-          
-          setFields("release_date", releaseDateStr);
-
-          foundImageUrl = `https://image.tmdb.org/t/p/original${result.poster_path}`;
-          imageFile = null;
+        if (data.results.length) {
+          handleMovieFetchResponseData(type, data);
         } else {
           const t: ToastSettings = {
             message: 'Couldn\'t find anything 👉👈',
@@ -207,6 +224,12 @@
 	const cBase = 'card p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'border border-surface-500 p-4 space-y-4 rounded-container-token';
+
+  function handleFindableInputChange(e: any) {
+    const { name } = e.target;
+    if (!fromResultMap[name]) return;
+    fromResultMap[name] = false;
+  }
 </script>
 
 <Toast />
@@ -229,7 +252,10 @@
         <div class="flex">
           <div class="flex-1 mr-2">
             <input 
+              on:input={handleFindableInputChange}
               disabled={submittingPiece}
+              class:bg-gradient-to-br={fromResultMap['name']}
+              class:variant-gradient-success-warning={fromResultMap['name']}
               name="name" 
               class="input"  
               type="text" 
@@ -247,8 +273,11 @@
       <label class="label">
         <span>Description (optional)</span>
         <textarea 
+          on:input={handleFindableInputChange}
           disabled={submittingPiece}
           class="textarea" 
+          class:bg-gradient-to-br={fromResultMap['description']}
+          class:variant-gradient-success-warning={fromResultMap['description']}
           name="description" 
           id="" rows="3"
         ></textarea>
@@ -291,7 +320,9 @@
         {/if}
       </label>
       {#if foundImageUrl}
-        <img src={foundImageUrl} class="block w-full h-24 md:h-40 lg:h-48 object-cover" alt="Found poster"/>
+        <div class="bg-gradient-to-br variant-gradient-success-warning p-2 rounded">
+          <img src={foundImageUrl} class="block w-full h-24 md:h-40 lg:h-48 object-cover rounded" alt="Found poster"/>
+        </div>
       {/if}
       <label class="label">
         <span>Image (optional)</span>
@@ -307,10 +338,13 @@
       <label class="label">
         <span>Release date (optional)</span>
         <input 
+          on:input={handleFindableInputChange}
           disabled={submittingPiece}
           accept=".png, .jpg, .jpeg"
           name="release_date" 
           class="input"  
+          class:bg-gradient-to-br={fromResultMap['release_date']}
+          class:variant-gradient-success-warning={fromResultMap['release_date']}
           type="date" 
         />
       </label>
