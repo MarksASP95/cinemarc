@@ -37,7 +37,7 @@
 
   function handleSearchSubmit(e: any) {
     if (e.key !== "Enter") return;
-    searchStr = e.target.value;
+    searchStr = (e.target.value as string).toLowerCase();
   }
 
   function clearSearch() {
