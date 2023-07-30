@@ -94,7 +94,7 @@
 </div>
 
 {#if !!displayedPieces && !!searchStr}
-  <div class="flex justify-center">
+  <div class="flex justify-center mb-4">
     <button on:click={clearSearch} type="button" class="btn w-full max-w-xs btn-sm variant-filled clear-search-button">
       Clear search
     </button>
