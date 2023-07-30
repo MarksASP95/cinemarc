@@ -85,6 +85,7 @@
     bind:this={searchInputEl}
     on:keyup={handleSearchSubmit}
     autocomplete="off" 
+    autocapitalize="none"
     id="piece-search-input" 
     tabindex="1" 
     class="input" 
