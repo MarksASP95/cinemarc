@@ -220,6 +220,10 @@
       {/if}
     </header>
     <form use:pieceForm class="modal-form {cForm}">
+      <!-- svelte-ignore a11y-autofocus -->
+      {#if !!pieceToEdit}
+        <input type="text" autofocus style="display:none" />
+      {/if}
       <label class="label">
         <span>Name</span>
         <div class="flex">
