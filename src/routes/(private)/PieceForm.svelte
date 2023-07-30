@@ -24,6 +24,13 @@
     release_date: false,
   };
 
+  let foundPieceConfig: {
+    results: (TMDBMovieSearchOutputResult | TMDBTVSearchOutputResult)[];
+    currentResultIndex: number;
+    searchText: string;
+    type: string;
+  } | null = null;
+
   function updatePieceToDB(data: PieceEditable) {
     submittingPiece = true;
     
@@ -150,11 +157,31 @@
       .finally(() => submittingPiece = false);
   }
 
-  function handleMovieFetchResponseData(
+  function goToNextResult() {
+    if (!foundPieceConfig) return;
+    foundPieceConfig.currentResultIndex 
+      = (foundPieceConfig.currentResultIndex + 1) % foundPieceConfig.results.length;
+    setPieceFormToResult(
+      foundPieceConfig.type, 
+      foundPieceConfig.results[foundPieceConfig.currentResultIndex]
+    );
+  }
+
+  function goToPreviousResult() {
+    if (!foundPieceConfig) return;
+    const newIndex = foundPieceConfig.currentResultIndex - 1;
+    foundPieceConfig.currentResultIndex 
+      = newIndex < 0 ? foundPieceConfig.results.length - 1 : newIndex;
+    setPieceFormToResult(
+      foundPieceConfig.type, 
+      foundPieceConfig.results[foundPieceConfig.currentResultIndex]
+    );
+  }
+
+  function setPieceFormToResult(
     type: string, 
-    data: TMDBMovieSearchOutput | TMDBTVSearchOutput
+    result: TMDBMovieSearchOutputResult | TMDBTVSearchOutputResult
   ) {
-    let result = data.results[0];
     setFields(
       "name", 
       type === "movie" ? 
@@ -205,8 +232,18 @@
       .then((res) => res.json())
       .then(({ data }: { data: TMDBMovieSearchOutput | TMDBTVSearchOutput }) => {
         if (data.results.length) {
-          handleMovieFetchResponseData(type, data);
+          foundPieceConfig = {
+            type,
+            currentResultIndex: 0,
+            results: data.results,
+            searchText,
+          }
+          setPieceFormToResult(
+            foundPieceConfig.type, 
+            data.results[foundPieceConfig.currentResultIndex]
+          );
         } else {
+          foundPieceConfig = null;
           const t: ToastSettings = {
             message: 'Couldn\'t find anything 👉👈',
             background: 'variant-filled-warning',
@@ -242,6 +279,19 @@
         Edit "{ pieceToEdit.name }"
       {/if}
     </header>
+
+    {#if !!foundPieceConfig}
+      <p class="text-center mb-1">
+        Found { foundPieceConfig.results.length } results for "{foundPieceConfig.searchText}"
+      </p>
+      <div class="flex justify-center items-center">
+        <button on:click={goToPreviousResult} type="button" class="btn-icon btn-icon-sm variant-filled bg-gradient-to-br variant-gradient-secondary-tertiary">👈</button>
+        <p class="font-mono text-sm mx-2">
+          {foundPieceConfig.currentResultIndex + 1}/{foundPieceConfig.results.length}
+        </p>
+        <button on:click={goToNextResult} type="button" class="btn-icon btn-icon-sm variant-filled bg-gradient-to-br variant-gradient-secondary-tertiary">👉</button>
+      </div>
+      {/if}
     <form use:pieceForm class="modal-form {cForm}">
       <!-- svelte-ignore a11y-autofocus -->
       {#if !!pieceToEdit}
