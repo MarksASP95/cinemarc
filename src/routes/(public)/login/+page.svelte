@@ -30,6 +30,8 @@
             const t: ToastSettings = {
                 message: 'Welcome back! ❤️',
                 background: 'variant-filled-success',
+                hideDismiss: true,
+                timeout: 800,
               };
               toastStore.trigger(t);
             goto("/pieces");
