@@ -4,6 +4,11 @@ import { authUser$, jwtToken$ } from "../../auth/auth.store";
 import type { CinemarcUser } from "../../models/user.model";
 import { auth, firestore } from "./config.fire";
 
+export function signOut() {
+  auth.signOut();
+  location.reload();
+}
+
 function fetchCurrentUser(uid: string): Promise<CinemarcUser | null> {
   const usersCol = collection(firestore, "users");
   return getDoc(doc(usersCol, uid))

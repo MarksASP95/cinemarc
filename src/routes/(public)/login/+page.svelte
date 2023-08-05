@@ -60,6 +60,16 @@
   });
 </script>
 
+<style lang="scss">
+  .cinemarc-login {
+    font-family: "Sono";
+    font-size: 2rem;
+  }
+</style>
+
+<h1 class="text-center cinemarc-login my-8">
+  cinemarc
+</h1>
 <div class="m-9 flex justify-center align-center">
   <form use:loginForm class="flex-1 border border-surface-500 p-4 space-y-4 rounded-container-token">
     <label class="label">

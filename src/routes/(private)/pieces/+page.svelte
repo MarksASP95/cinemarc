@@ -8,7 +8,10 @@
   import { get } from "svelte/store";
   import { modalStore, type ModalComponent, type ModalSettings, type ToastSettings, toastStore } from "@skeletonlabs/skeleton";
   import PieceForm from "../PieceForm.svelte";
+  import type { CinemarcUser } from "../../../models/user.model";
+  import { signOut } from "../../../client/firebase/auth.fire";
 
+  let authUser: CinemarcUser | undefined;
   let searchStr = ""
   let searchInputEl: HTMLInputElement;
 
@@ -24,6 +27,7 @@
   onMount(() => {
     authUser$.subscribe((user) => {
       if (user === null) return;
+      authUser = user;
     })
   })
 
@@ -71,15 +75,39 @@
     modalStore.trigger(formModal);
   }
   
+  function handleSignOutClick() {
+    signOut();
+  }
+
 </script>
 
-<style>
+<style lang="scss">
+  header {
+    height: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .cinemarc-home {
+      font-family: "Sono";
+    }
+  }
   .clear-search-button {
     max-width: 200px;
   }
 </style>
 
-<div class="search-bar my-8">
+<header>
+  <h1 class="text-center cinemarc-home">
+    cinemarc <span class="font-mono">({ authUser?.username || authUser?.email || '' })</span>
+  </h1>
+  <button on:click={handleSignOutClick} type="button" class="btn btn-sm bg-gradient-to-br variant-gradient-error-success">
+    <span>sign out</span>
+    <span>👋</span>
+  </button>
+</header>
+
+<div class="search-bar mb-8">
   <!-- svelte-ignore a11y-positive-tabindex -->
   <input 
     bind:this={searchInputEl}
