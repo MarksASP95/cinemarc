@@ -11,6 +11,7 @@
 
   export let parent: any;
   export let success: Function;
+  export let close: Function;
   export let pieceToEdit: Piece | undefined = undefined;
 
   let formErrors: Record<string, string> = {};
@@ -259,7 +260,7 @@
   }
 
 	const cBase = 'card p-4 w-modal shadow-xl space-y-4';
-	const cHeader = 'text-2xl font-bold';
+	const cHeader = 'text-2xl font-bold flex justify-between';
 	const cForm = 'border border-surface-500 p-4 space-y-4 rounded-container-token';
 
   function handleFindableInputChange(e: any) {
@@ -273,11 +274,17 @@
 {#if $modalStore[0]}
 	<div class="modal-example-form {cBase}">
     <header class={cHeader}>
-      {#if !pieceToEdit}
-        New Piece yay!
-      {:else}
-        Edit "{ pieceToEdit.name }"
-      {/if}
+      <span>
+        {#if !pieceToEdit}
+          New Piece yay!
+        {:else}
+          Edit "{ pieceToEdit.name }"
+        {/if}
+      </span>
+
+      <button class="text-base" on:click={() => close()}>
+        ❌
+      </button>
     </header>
 
     {#if !!foundPieceConfig}
@@ -398,8 +405,9 @@
           type="date" 
         />
       </label>
-      <footer class="modal-footer {parent.regionFooter}">
+      <footer class="modal-footer {parent.regionFooter} justify-between">
           <!-- <button class="btn {parent.buttonNeutral}" on:click={parent.onClose}>{parent.buttonTextCancel}</button> -->
+          <button type="button" on:click={() => close()}>close</button>
           <button disabled={submittingPiece} class="btn {parent.buttonPositive}" type="submit">
             {#if submittingPiece}
               <Spinner forButton />
