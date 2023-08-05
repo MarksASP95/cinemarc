@@ -31,6 +31,14 @@
     authUser$.subscribe((user) => {
       if (user === null) return goto("/login");
       authUser = user;
+    });
+
+    modalStore.subscribe((modals) => {
+      if (modals.length) {
+        document.body.style.overflow = "hidden";
+      } else {
+        document.body.style.overflow = "initial";
+      }
     })
   })
 
