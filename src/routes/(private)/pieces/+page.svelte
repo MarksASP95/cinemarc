@@ -10,6 +10,7 @@
   import PieceForm from "../PieceForm.svelte";
   import type { CinemarcUser } from "../../../models/user.model";
   import { signOut } from "../../../client/firebase/auth.fire";
+  import { goto } from "$app/navigation";
 
   let authUser: CinemarcUser | undefined;
   let searchStr = ""
@@ -26,7 +27,7 @@
 
   onMount(() => {
     authUser$.subscribe((user) => {
-      if (user === null) return;
+      if (user === null) return goto("/login");
       authUser = user;
     })
   })

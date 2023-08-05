@@ -5,10 +5,19 @@
   import { goto } from "$app/navigation";
   import Spinner from "../../../client/components/Spinner.svelte";
   import { toastStore, type ToastSettings } from "@skeletonlabs/skeleton";
+  import { onMount } from "svelte";
+  import { authUser$ } from "../../../auth/auth.store";
 
 
   let submitting = false;
   let formErrors: Record<string, string> = {};
+
+  onMount(() => {
+    authUser$.subscribe((user) => {
+      if (!!user) return goto("/pieces");
+    })
+  });
+
   const { form: loginForm } = createForm({
     onSubmit: (values) => {
       submitting = true;
