@@ -35,7 +35,12 @@ export function getPieces(onValue: ValueCallback<Piece[]>, filter: PieceFixedVal
   return valueCollectionSnap(q, onValue);
 }
 
+export function deletePiece(id: string): Promise<any> {
+  return updatePiece(id, { isDeleted: true, deletedAt: serverTimestamp() });
+}
+
 export function updatePiece(id: string, data: PieceEditable): Promise<any> {
+  console.log("updating", id);
   const pieceDoc = doc(piecesCol, id);
   return updateDoc(pieceDoc, data);
 }

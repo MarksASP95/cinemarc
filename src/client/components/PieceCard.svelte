@@ -2,13 +2,13 @@
   import type { Piece, PieceSource, PieceType } from "../../models/piece.model";
   import { pieceTypeDict } from "../../constants/piece.const";
   import { popup, type PopupSettings } from "@skeletonlabs/skeleton";
-  import { updatePiece } from "../pieces/piece.fire";
+  import { deletePiece, updatePiece } from "../pieces/piece.fire";
   import { createEventDispatcher } from "svelte";
 
   export let piece: Piece;
   export let index: number;
 
-  const dispatch = createEventDispatcher<{ editButtonClick: Piece }>();
+  const dispatch = createEventDispatcher<{ editButtonClick: Piece, pieceDeleted: string }>();
 
   function handleEditButtonClick() {
     dispatch("editButtonClick", piece);
@@ -66,6 +66,13 @@
     settingConsumedStateDict[pieceId] = true;
     updatePiece(pieceId, { consumed: newState })
       .finally(() => settingConsumedStateDict[pieceId] = false);
+  }
+
+  function handleDeleteButtonClick() {
+    deletePiece(piece.id)
+      .then(() => {
+        dispatch("pieceDeleted", piece.id);
+      });
   }
 </script>
 
@@ -146,12 +153,12 @@
   >
     <!-- <div class="arrow bg-surface-100-800-token" /> -->
     <p class="h4 mb-4 font-medium">{piece.name}</p>
-    <div class="flex justify-center">
+    <div class="flex flex-col">
       <button 
         type="button" 
         class:variant-filled-tertiary={!piece.consumed} 
         class:variant-filled-error={piece.consumed}
-        class="btn btn-sm variant-filled mr-1"
+        class="btn btn-sm variant-filled mb-3"
         on:click={() => setPieceConsumedState(piece.id, !piece.consumed)}
         disabled={settingConsumedStateDict[piece.id]}
       >
@@ -163,8 +170,12 @@
         {/if}
       </button>
 
-      <button on:click={handleEditButtonClick} type="button" class="btn variant-filled-secondary btn-sm">
+      <button on:click={handleEditButtonClick} type="button" class="btn variant-filled-secondary btn-sm mb-3">
         Edit ✏️
+      </button>
+
+      <button on:click={handleDeleteButtonClick} type="button" class="btn variant-filled-error btn-sm">
+        Delete 🗑️
       </button>
     </div>
   </div>
