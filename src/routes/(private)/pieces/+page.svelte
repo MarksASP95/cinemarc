@@ -231,7 +231,10 @@
           <div class="placeholder w-full" style="height: 200px;"></div>
         </header>
         <div class="p-4">
-          <div class="placeholder mb-2" style="width: 80px;"></div>
+          <div class="flex justify-between">
+            <div class="placeholder mb-2" style="width: 80px;"></div>
+            <div class="placeholder mb-2" style="width: 100px;"></div>
+          </div>
           <div class="placeholder mb-2" style="height: 30px;"></div>
           <div class="placeholder" style="height: 100px;"></div>
         </div>

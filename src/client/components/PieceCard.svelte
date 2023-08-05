@@ -4,10 +4,20 @@
   import { popup, type PopupSettings } from "@skeletonlabs/skeleton";
   import { deletePiece, updatePiece } from "../pieces/piece.fire";
   import { createEventDispatcher } from "svelte";
+  import { minimizeDate } from "../../utils/time.utils";
 
   export let piece: Piece;
   export let index: number;
 
+  const today = minimizeDate(new Date());
+  const pieceToBeReleased = piece.releaseDate ? 
+    minimizeDate(new Date(piece.releaseDate)).getTime() > today.getTime() 
+    : 
+    false;
+  const pieceReleasesToday = piece.releaseDate ? 
+    minimizeDate(new Date(piece.releaseDate)).getTime() === today.getTime() 
+    : 
+    false;
   const dispatch = createEventDispatcher<{ editButtonClick: Piece, pieceDeleted: string }>();
 
   function handleEditButtonClick() {
@@ -73,6 +83,18 @@
       .then(() => {
         dispatch("pieceDeleted", piece.id);
       });
+  }
+
+  function formatReleaseDate(dateStr: string) {
+    const date = new Date(dateStr);
+    return new Intl.DateTimeFormat(
+      "GB", 
+      { 
+        day: "numeric", 
+        month: "long", 
+        year: date.getFullYear() === today.getFullYear() ? undefined : "numeric" 
+      })
+      .format(date);
   }
 </script>
 
@@ -190,8 +212,18 @@
     </span>
   </header>
   <div class="p-4">
-    <div class={`badge ${badgeClassByPieceSource[piece.source]}`}>
-      {piece.source}
+    <div class="flex justify-between">
+      <div class={`badge ${badgeClassByPieceSource[piece.source]}`}>
+        {piece.source}
+      </div>
+      <div 
+        class="badge"
+        class:variant-soft-warning={pieceToBeReleased}
+        class:bg-gradient-to-br={pieceReleasesToday}
+        class:variant-gradient-warning-success={pieceReleasesToday}
+      >
+        {piece.releaseDate ? formatReleaseDate(piece.releaseDate) : ""}
+      </div>
     </div>
     <h3 class="h3">
       { piece.name }
