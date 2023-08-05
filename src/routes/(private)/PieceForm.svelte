@@ -259,7 +259,7 @@
     foundImageUrl = null;
   }
 
-	const cBase = 'card p-4 w-modal shadow-xl space-y-4';
+	const cBase = 'card p-4 w-modal shadow-xl space-y-4 overflow-auto';
 	const cHeader = 'text-2xl font-bold flex justify-between';
 	const cForm = 'border border-surface-500 p-4 space-y-4 rounded-container-token';
 
@@ -272,7 +272,7 @@
 
 <Toast />
 {#if $modalStore[0]}
-	<div class="modal-example-form {cBase}">
+	<div style="max-height: 94dvh" class="{cBase}">
     <header class={cHeader}>
       <span>
         {#if !pieceToEdit}
