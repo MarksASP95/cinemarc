@@ -110,7 +110,7 @@
 </script>
 
 <style lang="scss">
-  header {
+  header.cinemarc-header {
     height: 50px;
     display: flex;
     justify-content: space-between;
@@ -123,9 +123,26 @@
   .clear-search-button {
     max-width: 200px;
   }
+  .piece-card {
+    &__header {
+
+      > img {
+        opacity: 0;
+        transition: opacity 200ms ease-in-out;
+        width: 100%;
+        display: block;
+      }
+      
+      &--loaded {
+        > img {
+          opacity: 1;
+        }
+      }
+    }
+  }
 </style>
 
-<header>
+<header class="cinemarc-header">
   <h1 class="text-center cinemarc-home">
     cinemarc <span class="font-mono">({ authUser?.username || authUser?.email || '' })</span>
   </h1>
@@ -160,16 +177,25 @@
 
 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
   {#if !!displayedPieces}
-
-
     {#each displayedPieces as piece, index}
       <PieceCard on:editButtonClick={openEditModal} {piece} {index} />
     {/each}
 
-  <button on:click={handlePlusButtonClick} type="button" class="btn-icon btn-icon-xl variant-filled fixed bottom-6 right-6">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="#000" width="24" height="24" viewBox="0 0 24 24"><path d="M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z"/></svg>
-  </button>
+    <button on:click={handlePlusButtonClick} type="button" class="btn-icon btn-icon-xl variant-filled fixed bottom-6 right-6">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="#000" width="24" height="24" viewBox="0 0 24 24"><path d="M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z"/></svg>
+    </button>
   {:else}
-    <Spinner />
+    {#each [0, 0, 0, 0, 0, 0, 0, 0] as _}
+    <div class="card bg-initial relative piece-card cursor-pointer animate-pulse">
+      <header class="relative piece-card__header">
+        <div class="placeholder w-full" style="height: 200px;"></div>
+      </header>
+      <div class="p-4">
+        <div class="placeholder mb-2" style="width: 80px;"></div>
+        <div class="placeholder mb-2" style="height: 30px;"></div>
+        <div class="placeholder" style="height: 100px;"></div>
+      </div>
+    </div>
+    {/each}
   {/if}
 </div>
