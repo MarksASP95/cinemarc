@@ -40,7 +40,6 @@ export function deletePiece(id: string): Promise<any> {
 }
 
 export function updatePiece(id: string, data: PieceEditable): Promise<any> {
-  console.log("updating", id);
   const pieceDoc = doc(piecesCol, id);
   return updateDoc(pieceDoc, data);
 }
