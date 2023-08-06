@@ -23,6 +23,7 @@
     name: false,
     description: false,
     release_date: false,
+    image: false,
   };
 
   let foundPieceConfig: {
@@ -208,6 +209,7 @@
       name: true,
       description: true,
       release_date: true,
+      image: true,
     };
   }
   
@@ -257,6 +259,7 @@
   function handleImageInputChange(e: any) {
     imageFile = e.target.files[0] || null;
     foundImageUrl = null;
+    fromResultMap.image = false;
   }
 
 	const cBase = 'card p-4 w-modal shadow-xl space-y-4 overflow-auto';
@@ -377,7 +380,12 @@
         {/if}
       </label>
       {#if foundImageUrl}
-        <div class="bg-gradient-to-br variant-gradient-success-warning p-2 rounded">
+        <div 
+          class="p-2 rounded"
+          class:variant-filled-surface={!!!fromResultMap.image}
+          class:bg-gradient-to-br={!!fromResultMap.image}
+          class:variant-gradient-success-warning={!!fromResultMap.image}
+        >
           <img src={foundImageUrl} class="block w-full h-24 md:h-40 lg:h-48 object-cover rounded" alt="Found poster"/>
         </div>
       {/if}
