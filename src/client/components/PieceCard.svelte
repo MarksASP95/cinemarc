@@ -41,6 +41,21 @@
     mubi: "cinemarc-badge mubi",
   };
 
+  const sourceTextDict: Record<PieceSource, string> = {
+    downloaded: "downloaded",
+    hbo_max: "hbo max",
+    netflix: "netflix",
+    physical: "physical",
+    prime_video: "prime video",
+    theater: "theaters",
+    torrent_file: "torrent file",
+    youtube: "youtube",
+    unknown: "unknown",
+    spotify: "spotify",
+    web: "web",
+    mubi: "mubi",
+  };
+
   const settingConsumedStateDict: Record<string, boolean> = {};
 
   const consumedStateTextyPieceType: Record<PieceType, [string, string]> = {
@@ -214,7 +229,7 @@
   <div class="p-4">
     <div class="flex justify-between">
       <div class={`badge ${badgeClassByPieceSource[piece.source]}`}>
-        {piece.source}
+        {sourceTextDict[piece.source]}
       </div>
       <div 
         class="badge"
