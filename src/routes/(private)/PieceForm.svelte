@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Toast, modalStore, toastStore, type ToastSettings } from '@skeletonlabs/skeleton';
+	import { Toast, modalStore, toastStore, type ToastSettings, type ModalSettings } from '@skeletonlabs/skeleton';
   import { createForm } from "felte";
   import { uploadFile } from '../../client/firebase/storage.fire';
   import type { Piece, PieceCreate, PieceEditable } from '../../models/piece.model';
@@ -380,14 +380,17 @@
         {/if}
       </label>
       {#if foundImageUrl}
-        <div 
-          class="p-2 rounded"
+        <a
+          href={foundImageUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="p-2 rounded cursor-pointer"
           class:variant-filled-surface={!!!fromResultMap.image}
           class:bg-gradient-to-br={!!fromResultMap.image}
           class:variant-gradient-success-warning={!!fromResultMap.image}
         >
           <img src={foundImageUrl} class="block w-full h-24 md:h-40 lg:h-48 object-cover rounded" alt="Found poster"/>
-        </div>
+        </a>
       {/if}
       <label class="label">
         <span>Image (optional)</span>
