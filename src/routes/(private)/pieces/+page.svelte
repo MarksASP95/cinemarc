@@ -34,11 +34,14 @@
     });
     
     function handlePopState() {
-      modalStore.clear();
+      modalStore.update((modals) => {
+        modals.pop();
+        return modals;
+      })
     }
     modalStore.subscribe((modals) => {
       if (modals.length === 1) {
-        window.location.hash = 'modal';
+        window.location.hash = modals[0].meta["id"] || 'modal';
         addEventListener("popstate", handlePopState);
       }
       if (modals.length) {
@@ -94,6 +97,7 @@
     const formModal: ModalSettings = {
       type: "component",
       component: formModalComponent,
+      meta: { id: "piece" }
     }
     modalStore.trigger(formModal);
   }
@@ -125,6 +129,7 @@
     const formModal: ModalSettings = {
       type: "component",
       component: formModalComponent,
+      meta: { id: "piece" },
     }
     modalStore.trigger(formModal);
   }
