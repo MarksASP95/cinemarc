@@ -384,7 +384,7 @@
           href={foundImageUrl}
           target="_blank"
           rel="noopener noreferrer"
-          class="p-2 rounded cursor-pointer"
+          class="p-2 rounded block"
           class:variant-filled-surface={!!!fromResultMap.image}
           class:bg-gradient-to-br={!!fromResultMap.image}
           class:variant-gradient-success-warning={!!fromResultMap.image}
