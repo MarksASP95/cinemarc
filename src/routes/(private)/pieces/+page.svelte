@@ -32,11 +32,22 @@
       if (user === null) return goto("/login");
       authUser = user;
     });
-
+    
+    function handlePopState() {
+      modalStore.clear();
+    }
     modalStore.subscribe((modals) => {
+      if (modals.length === 1) {
+        window.location.hash = 'modal';
+        addEventListener("popstate", handlePopState);
+      }
       if (modals.length) {
         document.body.style.overflow = "hidden";
       } else {
+        if (window.location.hash) {
+          history.replaceState({}, document.title, window.location.href.split('#')[0]);
+        }
+        removeEventListener("popstate", handlePopState)
         document.body.style.overflow = "initial";
       }
     })
