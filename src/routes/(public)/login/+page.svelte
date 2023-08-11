@@ -1,13 +1,12 @@
 <script lang="ts">
   import { createForm } from "felte";
   import { signInWithEmailAndPassword } from "firebase/auth";
-  import { auth } from "../../../client/firebase/config.fire";
   import { goto } from "$app/navigation";
   import Spinner from "../../../client/components/Spinner.svelte";
   import { toastStore, type ToastSettings } from "@skeletonlabs/skeleton";
   import { onMount } from "svelte";
   import { authUser$ } from "../../../auth/auth.store";
-
+  import { auth } from "../../../store/firebase.store";
 
   let submitting = false;
   let formErrors: Record<string, string> = {};
@@ -34,7 +33,7 @@
 
         const { email, password } = values;
 
-        signInWithEmailAndPassword(auth, email, password)
+        signInWithEmailAndPassword(auth(), email, password)
           .then(() => {
             const t: ToastSettings = {
                 message: 'Welcome back! ❤️',

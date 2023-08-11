@@ -1,5 +1,5 @@
-import { ref, uploadBytesResumable, getDownloadURL, StorageError, type StorageReference } from "firebase/storage";
-import { storage } from "./config.fire";
+import { ref, uploadBytesResumable, getDownloadURL, StorageError, type StorageReference } from "firebase/storage";import { storage } from "../../store/firebase.store";
+;
 
 export function uploadFile(
   path: string, 
@@ -8,7 +8,7 @@ export function uploadFile(
   onError?: (error: StorageError) => void,
   onFinish?: (ref: StorageReference, getUrl: Promise<string>) => void,
 ): Promise<{ ref: StorageReference, url: string }> {
-  const storageRef = ref(storage, path);
+  const storageRef = ref(storage(), path);
   const uploadTask = uploadBytesResumable(storageRef, file);
 
   return new Promise((resolve, reject) => {

@@ -1,12 +1,12 @@
 import { addDoc, collection, CollectionReference, doc, documentId, getDoc, onSnapshot, Query, query, QueryFieldFilterConstraint, serverTimestamp, setDoc, updateDoc, where, type DocumentData } from "firebase/firestore";
 import type { ColSnapshotCallback, ValueCallback } from "../../models/general.model";
 import type { Piece, PieceCreate, PieceEditable, PieceFixedValueFilter } from "../../models/piece.model";
-import { firestore } from "../firebase/config.fire";
 import { generateId, subscribeTo, valueCollectionSnap } from "../firebase/docs.fire";
 import { get } from 'svelte/store';
 import { authUser$ } from "../../auth/auth.store";
+import { firestore } from "../../store/firebase.store";
 
-const piecesCol = collection(firestore, "pieces") as CollectionReference<Piece>;
+const piecesCol = collection(firestore(), "pieces") as CollectionReference<Piece>;
 
 export function getPieces(onValue: ValueCallback<Piece[]>, filter: PieceFixedValueFilter = {}) {
   const user = get(authUser$);

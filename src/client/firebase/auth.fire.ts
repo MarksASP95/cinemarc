@@ -2,15 +2,16 @@ import { goto } from "$app/navigation";
 import { collection, doc, getDoc } from "firebase/firestore";
 import { authUser$, jwtToken$ } from "../../auth/auth.store";
 import type { CinemarcUser } from "../../models/user.model";
-import { auth, firestore } from "./config.fire";
+import { auth, firestore } from "../../store/firebase.store";
 
 export function signOut() {
-  auth.signOut();
+  auth().signOut();
   location.reload();
 }
 
 function fetchCurrentUser(uid: string): Promise<CinemarcUser | null> {
-  const usersCol = collection(firestore, "users");
+  const fs = firestore()
+  const usersCol = collection(fs, "users");
   return getDoc(doc(usersCol, uid))
     .then((userSnap) => {
       if (!userSnap.exists) return null;
@@ -19,7 +20,7 @@ function fetchCurrentUser(uid: string): Promise<CinemarcUser | null> {
 }
 
 export function listenToAuthChanges() {
-  auth.onAuthStateChanged(
+  auth().onAuthStateChanged(
     (authState) => {
       if (!authState) {
         authUser$.set(null);

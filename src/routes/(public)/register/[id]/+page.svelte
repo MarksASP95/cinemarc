@@ -3,7 +3,6 @@
     import Spinner from "../../../../client/components/Spinner.svelte";
     import { toastStore, type ToastSettings } from "@skeletonlabs/skeleton";
     import { createUserWithEmailAndPassword } from "firebase/auth";
-  import { auth } from "../../../../client/firebase/config.fire";
   import { uploadFile } from "../../../../client/firebase/storage.fire";
   import { goto } from "$app/navigation";
   
