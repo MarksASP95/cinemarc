@@ -1,4 +1,4 @@
-import { browserLocalPersistence, getAuth, setPersistence, type Auth } from "firebase/auth";
+import { browserLocalPersistence, getAuth, initializeAuth, setPersistence, type Auth } from "firebase/auth";
 import { get, writable } from "svelte/store";
 import { getCurrentApp } from "./firebase.store";
 
@@ -10,10 +10,9 @@ export function auth(): Auth {
   
   let auth = get(auth$);
   if (!auth) {
-    auth = getAuth(app);
-    (async () => {
-      await setPersistence(auth, browserLocalPersistence);
-    })();
+    auth = initializeAuth(app, {
+      persistence: browserLocalPersistence,
+    });
 
     auth$.set(auth);
     return auth;
