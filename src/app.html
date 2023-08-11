@@ -9,9 +9,25 @@
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">
+
+		<!-- FONTS -->
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Sono:wght@600&display=swap" rel="stylesheet">
+		<link 
+			href="https://fonts.googleapis.com/css2?family=Sono:wght@600&display=swap" 
+			rel="preload" 
+			as="style">
+		<link 
+			href="https://fonts.googleapis.com/css2?family=Sono:wght@600&display=swap" 
+			rel="stylesheet" 
+			as="style">
+		<link 
+			href="https://fonts.googleapis.com/css2?family=Sono:wght@600&display=swap" 
+			rel="stylesheet" 
+			media="print"
+			onload="this.media='all'">
+		<!--  -->
+
 		<div style="display: contents">%sveltekit.body%</div>
 
 
