@@ -2,7 +2,8 @@ import { goto } from "$app/navigation";
 import { collection, doc, getDoc } from "firebase/firestore";
 import { authUser$, jwtToken$ } from "../../auth/auth.store";
 import type { CinemarcUser } from "../../models/user.model";
-import { auth, firestore } from "../../store/firebase.store";
+import { auth } from "../../store/firebase-auth.store";
+import { firestore } from "../../store/firebase-firestore.store";
 
 export function signOut() {
   auth().signOut();

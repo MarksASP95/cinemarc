@@ -6,7 +6,7 @@
   import { toastStore, type ToastSettings } from "@skeletonlabs/skeleton";
   import { onMount } from "svelte";
   import { authUser$ } from "../../../auth/auth.store";
-  import { auth } from "../../../store/firebase.store";
+  import { auth } from "../../../store/firebase-auth.store";
 
   let submitting = false;
   let formErrors: Record<string, string> = {};

@@ -4,7 +4,7 @@ import type { Piece, PieceCreate, PieceEditable, PieceFixedValueFilter } from ".
 import { generateId, subscribeTo, valueCollectionSnap } from "../firebase/docs.fire";
 import { get } from 'svelte/store';
 import { authUser$ } from "../../auth/auth.store";
-import { firestore } from "../../store/firebase.store";
+import { firestore } from "../../store/firebase-firestore.store";
 
 const piecesCol = collection(firestore(), "pieces") as CollectionReference<Piece>;
 

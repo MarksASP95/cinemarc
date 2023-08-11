@@ -1,4 +1,5 @@
-import { ref, uploadBytesResumable, getDownloadURL, StorageError, type StorageReference } from "firebase/storage";import { storage } from "../../store/firebase.store";
+import { ref, uploadBytesResumable, getDownloadURL, StorageError, type StorageReference } from "firebase/storage";
+import { storage } from "../../store/firebase-storage.store";
 ;
 
 export function uploadFile(
