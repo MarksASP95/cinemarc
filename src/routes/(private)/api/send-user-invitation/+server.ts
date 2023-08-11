@@ -2,6 +2,7 @@ import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { createInvitation } from '../../../../server/controllers/auth.controller';
 import type { CinemarcUserRank } from '../../../../models/user.model';
+import type { CinemarcResponse } from '../../../../models/api.model';
 
 export const POST = (async (event) => {
   const { email, rank } = await event.request.json();
@@ -21,16 +22,16 @@ export const POST = (async (event) => {
     throw error(400, { message: "Rank value is not valid" });
   }
 
+  let response: CinemarcResponse<any>;
   try {
-    const response = await createInvitation(email, rank)
-    if (response.status === 200) {
-      return json({ status: 200, data: response.data });
-    } else {
-      console.log("Error", response)
-      return json({ status: response.status })
-    }
-  } catch (error) {
-    return json({ status: 500, message: "Error sending user invitation" });
+    response = await createInvitation(email, rank)
+  } catch (error) {}
+
+  if (response!.status === 200) {
+    return json({ status: 200, data: response!.data });
+  } else {
+    console.log("Error", response!)
+    throw error(response!.status, { message: response!.message || "" })
   }
 
 }) satisfies RequestHandler;

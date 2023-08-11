@@ -89,12 +89,12 @@ export async function createInvitation(email: string, rank: CinemarcUserRank): P
   
   const linkUrl = `https://cinemarc.vercel.app/register/${userDoc.id}`;
 
-  getTransport()
+  await getTransport()
     .sendMail({
       to: email,
       html: `
         <p>Complete your profile with the link below</p>
-        <a href="${linkUrl}"></a>
+        <a href="${linkUrl}">${linkUrl}</a>
       `,
       from: `Cinemarc <${EMAIL_USER}>`,
       subject: "Complete your profile",

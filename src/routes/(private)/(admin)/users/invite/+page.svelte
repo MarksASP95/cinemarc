@@ -42,7 +42,7 @@
         })
         .catch((error) => {
           const t: ToastSettings = {
-              message: error,
+              message: JSON.parse(error.message).message,
               background: 'variant-filled-error',
             };
           toastStore.trigger(t);
@@ -56,7 +56,10 @@
 </script>
 
 
-<div class="m-9 flex justify-center align-center">
+<div class="m-9 flex flex-col justify-center align-center">
+  <h1 class="text-center text-xl mb-4 font-mono">
+    Invite user
+  </h1>
   <form use:inviteUserForm class="flex-1 border border-surface-500 p-4 space-y-4 rounded-container-token">
     <label class="label">
       <span>Email</span>
@@ -76,7 +79,7 @@
       <select name="rank" class="select" disabled={invitingUser}>
         <option value="" selected disabled>Select a rank</option>
         <option value="user">User</option>
-        <option value="invited">Invited</option>
+        <option value="admin">Admin</option>
       </select>
       {#if formErrors.rank}
         <small class="text-error-500">{formErrors.rank}</small>
