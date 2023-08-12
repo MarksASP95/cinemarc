@@ -2,6 +2,7 @@ import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { createAuthUserWithInvitation, createInvitation } from '../../../../server/controllers/auth.controller';
 import type { CinemarcUserRank } from '../../../../models/user.model';
+import { checkPassword, checkUsername } from '../../../../constants/user.const';
 
 export const POST = (async (event) => {
   const { userId, password, username, avatarUrl } = await event.request.json();
@@ -18,17 +19,21 @@ export const POST = (async (event) => {
   if (!username) {
     throw error(400, { message: "Username is required" });
   }
-  if (username.length > 30 || username.length < 6) {
-    throw error(400, { message: "Username must have between 6 and 30 characters" });
-  }
   if (typeof password !== "string") {
     throw error(400, { message: "Password must be a string" });
   }
   if (!password) {
     throw error(400, { message: "Password is required" });
   }
-  if (password.length > 100 || password.length < 6) {
-    throw error(400, { message: "Password must have between 6 and 100 characters" });
+
+  const usernameError = checkUsername(username);
+  if (usernameError) {
+    throw error(400, { message: usernameError });
+  }
+
+  const passwordError = checkPassword(password);
+  if (passwordError) {
+    throw error(400, { message: passwordError });
   }
 
   try {

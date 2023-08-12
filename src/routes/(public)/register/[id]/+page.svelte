@@ -5,6 +5,7 @@
     import { createUserWithEmailAndPassword } from "firebase/auth";
   import { uploadFile } from "../../../../client/firebase/storage.fire";
   import { goto } from "$app/navigation";
+  import { USERNAME_MAX_LENGTH, checkPassword, checkUsername } from "../../../../constants/user.const";
   
     export let data: { email: string, uid: string };
 
@@ -15,27 +16,42 @@
 
     const { form: inviteUserForm, setInitialValues } = createForm({
       onSubmit: (values) => {
-        submitting = true;
         const requiredFields = ["username", "password"];
         const errors: Record<string, string> = {};
+        formErrors = {};
         requiredFields.forEach((field) => {
           if (!values[field]) errors[field] = "This field is required";
         });
         if (Object.keys(errors).length) {
           formErrors = errors;
-          return;
         }
-        formErrors = {};
   
-        console.log(values);
         // return;
-        const { username, password } = values;
+        const { username, password, password_repeat } = values;
+
+        const usernameError = checkUsername(username);
+        if (usernameError) {
+          formErrors.username = usernameError;
+        }
+
+        const passwordError = checkPassword(password);
+        if (passwordError) {
+          formErrors.password = passwordError;
+        }
+
+        if (password !== password_repeat) {
+          formErrors.password_repeat = "Passwords don't match"
+        }
+
+        if (Object.keys(formErrors).length) return;
 
         let uploadImageFile: Promise<string | null> = Promise.resolve(null);
         if (imageFile) {
             const filePath = `user_avatars/${new Date().getTime()}_${imageFile.name}`;
             uploadImageFile = uploadFile(filePath, imageFile).then(({ url }) => url);
         }
+
+        submitting = true;
         uploadImageFile
             .then((url) => {
                 return fetch("/api/register", {
@@ -103,14 +119,16 @@
         />
       </label>
       <label class="label">
-        <span>Name</span>
+        <span>Username</span>
         <input 
           disabled={submitting}
           name="username" 
           class="input"  
           type="text" 
           autocomplete="off"
+          maxlength={USERNAME_MAX_LENGTH}
         />
+        <small class="block">Can only contain letters (at least 1), numbers and underscores</small>
         {#if formErrors.username}
             <small class="text-error-500">{formErrors.username}</small>
         {/if}
@@ -126,6 +144,19 @@
         />
         {#if formErrors.password}
             <small class="text-error-500">{formErrors.password}</small>
+        {/if}
+      </label>
+      <label class="label">
+        <span>Repeat password</span>
+        <input 
+          disabled={submitting}
+          name="password_repeat" 
+          class="input"  
+          type="password" 
+          autocomplete="off"
+        />
+        {#if formErrors.password_repeat}
+            <small class="text-error-500">{formErrors.password_repeat}</small>
         {/if}
       </label>
       <label class="label">

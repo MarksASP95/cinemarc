@@ -1,9 +1,15 @@
 import { goto } from "$app/navigation";
 import { collection, doc, getDoc } from "firebase/firestore";
+import { get } from "svelte/store";
 import { authUser$, jwtToken$ } from "../../auth/auth.store";
 import type { CinemarcUser } from "../../models/user.model";
 import { auth } from "../../store/firebase-auth.store";
 import { firestore } from "../../store/firebase-firestore.store";
+
+const PUBLIC_ROUTES = [
+  "login",
+  "register",
+];
 
 export function signOut() {
   auth().signOut();
@@ -24,9 +30,13 @@ export function listenToAuthChanges() {
   auth().onAuthStateChanged(
     (authState) => {
       if (!authState) {
+        const locationName = window.location.pathname.split("/")[1];
+        const routeIsPublic = !!PUBLIC_ROUTES.find((route) => route.includes(locationName));
+        if (get(authUser$) || !routeIsPublic) {
+          goto("/login", { replaceState: true });
+        }
         authUser$.set(null);
         jwtToken$.set(null);
-        goto("/login", { replaceState: true });
         return;
       }
 

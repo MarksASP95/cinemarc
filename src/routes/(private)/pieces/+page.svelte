@@ -232,20 +232,34 @@
     </button>
   </header>
   
-  <div class="search-bar mb-8">
-    <!-- svelte-ignore a11y-positive-tabindex -->
-    <input 
-      bind:this={searchInputEl}
-      on:keyup={handleSearchSubmit}
-      autocomplete="off" 
-      autocapitalize="none"
-      id="piece-search-input" 
-      tabindex="1" 
-      class="input" 
-      type="text" 
-      placeholder="Search for a movie, series, podcast, or anything" 
-    />
-  </div>
+  {#if !!displayedPieces?.length}
+    <div class="search-bar mb-8">
+      <!-- svelte-ignore a11y-positive-tabindex -->
+      <input 
+        bind:this={searchInputEl}
+        on:keyup={handleSearchSubmit}
+        autocomplete="off" 
+        autocapitalize="none"
+        id="piece-search-input" 
+        tabindex="1" 
+        class="input" 
+        type="text" 
+        placeholder="Search for a movie, series, podcast, or anything" 
+      />
+    </div>
+  {/if}
+
+  {#if displayedPieces?.length === 0}
+    <div class="p4 mt-16">
+      <p class="text-center mt-4 mb-4" style="font-size: 4rem;">
+        🗿
+      </p>
+      <p class="text-center text-xl p-4">
+        You have no pieces. Use the button below to start!
+      </p>
+    </div>
+  {/if}
+  
   
   {#if !!displayedPieces && !!searchStr}
     <div class="flex justify-center mb-4">

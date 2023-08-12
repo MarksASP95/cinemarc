@@ -65,31 +65,9 @@ export async function signIn(email: string, password: string): Promise<CinemarcR
   return { status: 200, data: { token }, message: null };
 }
 
-export async function createInvitation(email: string, rank: CinemarcUserRank): Promise<CinemarcResponse> {
-  try {
-    await admin.auth().getUserByEmail(email);
-    return { status: 412, message: "User already exists", data: null };
-  } catch (error) {}
-
-  const userDoc = admin.firestore().collection("users").doc();
-  const userDB: CinemarcUser = {
-    authStatus: "invited",
-    avatarUrl: null,
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    deletedAt: null,
-    email,
-    id: userDoc.id,
-    isActive: false,
-    isDeleted: false,
-    rank,
-    username: "",
-  };
-
-  await userDoc.set(userDB);
-  
-  const linkUrl = `https://cinemarc.vercel.app/register/${userDoc.id}`;
-
-  await getTransport()
+function sendInvitationEmail(email: string, userId: string): Promise<any> {
+  const linkUrl = `https://cinemarc.vercel.app/register/${userId}`;
+  return getTransport()
     .sendMail({
       to: email,
       html: `
@@ -99,6 +77,43 @@ export async function createInvitation(email: string, rank: CinemarcUserRank): P
       from: `Cinemarc <${EMAIL_USER}>`,
       subject: "Complete your profile",
     });
+}
+
+export async function createInvitation(email: string, rank: CinemarcUserRank): Promise<CinemarcResponse> {
+  try {
+    await admin.auth().getUserByEmail(email);
+    return { status: 412, message: "User already exists", data: null };
+  } catch (error) {}
+
+  const userOnDBSnap = await admin.firestore()
+    .collection("users")
+    .where("email", "==", email)
+    .where("authStatus", "==", "invited")
+    .get();
+    
+  const invitedUserDoc = userOnDBSnap.docs[0];
+  if (invitedUserDoc) {
+    await invitedUserDoc.ref.update({ rank });
+    await sendInvitationEmail(email, invitedUserDoc.id);
+  } else {
+    const userDoc = admin.firestore().collection("users").doc();
+    const userDB: CinemarcUser = {
+      authStatus: "invited",
+      avatarUrl: null,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      deletedAt: null,
+      email,
+      id: userDoc.id,
+      isActive: false,
+      isDeleted: false,
+      rank,
+      username: "",
+    };
+  
+    await userDoc.set(userDB);
+    await sendInvitationEmail(email, userDoc.id)
+  }
+
 
   return { status: 200, data: null, message: null };
 }

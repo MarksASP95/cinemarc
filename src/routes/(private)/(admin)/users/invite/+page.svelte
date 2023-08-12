@@ -8,9 +8,9 @@
 
   const { form: inviteUserForm } = createForm({
     onSubmit: (values) => {
-      invitingUser = true;
       const requiredFields = ["email", "rank"];
       const errors: Record<string, string> = {};
+      formErrors = {};
       requiredFields.forEach((field) => {
         if (!values[field]) errors[field] = "This field is required";
       });
@@ -18,7 +18,8 @@
         formErrors = errors;
         return;
       }
-      formErrors = {};
+
+      invitingUser = true;
 
       fetch("/api/send-user-invitation", {
         method: "POST",
