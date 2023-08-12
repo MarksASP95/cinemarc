@@ -18,7 +18,11 @@
     minimizeDate(new Date(piece.releaseDate)).getTime() === today.getTime() 
     : 
     false;
-  const dispatch = createEventDispatcher<{ editButtonClick: Piece, pieceDeleted: string }>();
+  const dispatch = createEventDispatcher<{ 
+    editButtonClick: Piece, 
+    pieceDeleted: string,
+    pieceConsumed: string,
+  }>();
 
   function handleEditButtonClick() {
     dispatch("editButtonClick", piece);
@@ -90,6 +94,7 @@
   function setPieceConsumedState(pieceId: string, newState: boolean) {
     settingConsumedStateDict[pieceId] = true;
     updatePiece(pieceId, { consumed: newState })
+      .then(() => dispatch("pieceConsumed", piece.id))
       .finally(() => settingConsumedStateDict[pieceId] = false);
   }
 

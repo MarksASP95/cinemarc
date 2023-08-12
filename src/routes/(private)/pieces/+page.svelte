@@ -20,6 +20,7 @@
   $: displayedPieces = filterPiecesBySearch(searchStr, pieces);
 
   let undoDeleteFn: Function | null = null;
+  let undoConsumedFn: Function | null = null;
 
   function filterPiecesBySearch(_searchStr: string, pieces: Piece[] | null): Piece[] | null {
     if (!pieces) return null;
@@ -138,6 +139,11 @@
     updatePiece(pieceId, { isDeleted: false, deletedAt: null });
     undoDeleteFn = null;
   }
+  
+  function undoConsumed(pieceId: string) {
+    updatePiece(pieceId, { consumed: false });
+    undoConsumedFn = null;
+  }
 
   function handlePieceDeleted(e: CustomEvent<string>) {
     const { detail: pieceId } = e;
@@ -145,6 +151,15 @@
     undoDeleteFn = undoDelete.bind(this, pieceId);
     setTimeout(() => {
       if (!!undoDeleteFn) undoDeleteFn = null;
+    }, 4000);
+  }
+
+  function handlePieceConsumed(e: CustomEvent<string>) {
+    const { detail: pieceId } = e;
+    // @ts-ignore
+    undoConsumedFn = undoConsumed.bind(this, pieceId);
+    setTimeout(() => {
+      if (!!undoConsumedFn) undoConsumedFn = null;
     }, 4000);
   }
 </script>
@@ -180,7 +195,7 @@
       }
     }
   }
-  .undo-delete-popup {
+  .undo-popup {
     position: fixed;
     top: -50px;
     left: 50%;
@@ -191,12 +206,21 @@
     &.show {
       top: 30px;
     }
+
+    &--second {
+      &.show {
+        top: 83px;
+      }
+    }
   }
 </style>
 
 <section class="pieces-page">
-  <div class:show={!!undoDeleteFn} class="undo-delete-popup btn btn-sm bg-gradient-to-br variant-gradient-primary-tertiary">
+  <div class:show={!!undoDeleteFn} class="undo-popup btn btn-sm bg-gradient-to-br variant-gradient-error-warning">
     Piece deleted &nbsp; <button on:click={() => undoDeleteFn ? undoDeleteFn() : null} type="button" class="btn btn-sm variant-ghost-success">undo</button>
+  </div>
+  <div class:undo-popup--second={!!undoDeleteFn} class:show={!!undoConsumedFn} class="undo-popup btn btn-sm bg-gradient-to-br variant-gradient-primary-tertiary">
+    Marked as consumed &nbsp; <button on:click={() => undoConsumedFn ? undoConsumedFn() : null} type="button" class="btn btn-sm variant-ghost-success">undo</button>
   </div>
   <header class="cinemarc-header">
     <h1 class="text-center cinemarc-home">
@@ -234,7 +258,7 @@
   <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
     {#if !!displayedPieces}
       {#each displayedPieces as piece, index (piece.id)}
-        <PieceCard on:pieceDeleted={handlePieceDeleted} on:editButtonClick={openEditModal} {piece} {index} />
+        <PieceCard on:pieceConsumed={handlePieceConsumed} on:pieceDeleted={handlePieceDeleted} on:editButtonClick={openEditModal} {piece} {index} />
       {/each}
   
       <button on:click={handlePlusButtonClick} type="button" class="btn-icon btn-icon-xl variant-filled fixed bottom-6 right-6">
