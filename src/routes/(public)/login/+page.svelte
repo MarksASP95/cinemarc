@@ -13,7 +13,7 @@
 
   onMount(() => {
     authUser$.subscribe((user) => {
-      if (!!user) return goto("/pieces");
+      if (!!user) return goto("/pieces", { replaceState: true });
     })
   });
 

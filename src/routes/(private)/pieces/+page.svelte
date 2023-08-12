@@ -30,7 +30,7 @@
 
   onMount(() => {
     authUser$.subscribe((user) => {
-      if (user === null) return goto("/login");
+      if (user === null) return goto("/login", { replaceState: true });
       authUser = user;
     });
     

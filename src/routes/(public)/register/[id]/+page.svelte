@@ -56,7 +56,7 @@
                   background: 'variant-filled-success',
                 };
                 toastStore.trigger(t);
-                goto("/login");
+                goto("/login", { replaceState: true });
               } else {
                 res.json().then(({ message }) => {
                     const t: ToastSettings = {

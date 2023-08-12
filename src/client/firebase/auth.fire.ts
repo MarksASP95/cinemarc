@@ -26,7 +26,7 @@ export function listenToAuthChanges() {
       if (!authState) {
         authUser$.set(null);
         jwtToken$.set(null);
-        goto("/login");
+        goto("/login", { replaceState: true });
         return;
       }
 
