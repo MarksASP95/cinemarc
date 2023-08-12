@@ -36,17 +36,12 @@ export const POST = (async (event) => {
     throw error(400, { message: passwordError });
   }
 
-  try {
-    const response = await createAuthUserWithInvitation(userId, password, username, avatarUrl);
-    if (response.status === 200) {
-      return json({ status: 200, data: response.data });
-    } else {
-      console.log("Error", response)
-      throw error(500, { message: "An error has ocurred" });
-    }
-  } catch (e) {
-    console.log(e);
-    throw error(500, { message: "An error has ocurred" });
+  const response = await createAuthUserWithInvitation(userId, password, username, avatarUrl);
+  if (response.status === 200) {
+    return json({ status: 200, data: response.data });
+  } else {
+    console.log("Error", response)
+    throw error(response.status, { message: response.message || "An error has ocurredddd" });
   }
 
 }) satisfies RequestHandler;

@@ -131,6 +131,11 @@ export async function createAuthUserWithInvitation(userId: string, password: str
     return { status: 412, message: "User already exists", data: null };
   } catch (error) {}
 
+  const userWithUsernameSnap = await admin.firestore().collection("users").where("username", "==", username).get();
+  if (userWithUsernameSnap.docs.length) {
+    return { status: 403, message: "Username is taken", data: null };
+  }
+
   await admin.auth().createUser({ email, password, uid: userId });
   const userUpdateData: Partial<CinemarcUser> = {
     authStatus: "complete",
