@@ -42,7 +42,7 @@
                 timeout: 800,
               };
               toastStore.trigger(t);
-            goto("/pieces");
+            goto("/pieces", { replaceState: true });
           })
           .catch((err) => {
             if (err.code === "auth/user-not-found") {
