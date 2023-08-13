@@ -249,7 +249,7 @@
     </div>
   {/if}
 
-  {#if displayedPieces?.length === 0}
+  {#if pieces?.length === 0}
     <div class="p4 mt-16">
       <p class="text-center mt-4 mb-4" style="font-size: 4rem;">
         🗿
