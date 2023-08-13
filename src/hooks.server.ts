@@ -38,7 +38,6 @@ async function checkAuthentication(
 
 /// type: import('@sveltejs/kit').Handle
 export const first: Handle = async  ({ event, resolve }) => {
-  console.log('first pre-processing');
   switch (event.url.pathname) {
     case "/api/search-movie-tmdb": {
       await checkAuthentication(event);
