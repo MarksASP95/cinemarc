@@ -29,9 +29,9 @@ function fetchCurrentUser(uid: string): Promise<CinemarcUser | null> {
 export function listenToAuthChanges() {
   auth().onAuthStateChanged(
     (authState) => {
+      const locationName = window.location.pathname.split("/")[1];
+      const routeIsPublic = !!PUBLIC_ROUTES.find((route) => route.includes(locationName));
       if (!authState) {
-        const locationName = window.location.pathname.split("/")[1];
-        const routeIsPublic = !!PUBLIC_ROUTES.find((route) => route.includes(locationName));
         if (get(authUser$) || !routeIsPublic) {
           goto("/login", { replaceState: true });
         }
@@ -39,6 +39,8 @@ export function listenToAuthChanges() {
         jwtToken$.set(null);
         return;
       }
+
+      if (routeIsPublic) goto("/pieces", { replaceState: true });
 
       fetchCurrentUser(authState.uid)
         .then((user) => {
