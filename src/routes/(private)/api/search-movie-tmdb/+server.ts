@@ -5,6 +5,8 @@ import type { TMDBMovieSearchOutput, TMDBTVSearchOutput } from '../../../../mode
 
 export const POST = (async (event) => {
     const { searchText, type } = await event.request.json();
+    const authorization = event.request.headers.get("Authorization");
+  
 
     const url = `https://api.themoviedb.org/3/search/${type}?query=${encodeURI(searchText)}&include_adult=false&language=en-US&page=1`;
     const options: RequestInit = {

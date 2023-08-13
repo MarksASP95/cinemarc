@@ -59,3 +59,10 @@ export function listenToAuthChanges() {
     }
   );
 }
+
+export function getAuthorizationHeader(): object {
+  if (!get(jwtToken$)) return {};
+  return {
+    "Authorization": `Bearer ${get(jwtToken$)}`,
+  };
+}

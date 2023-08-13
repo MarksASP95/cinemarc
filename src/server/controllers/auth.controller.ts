@@ -8,7 +8,7 @@ import type { UserRecord } from "firebase-admin/lib/auth/user-record";
 
 initializeFirebase();
 
-function getTokenGeneratorApp() {
+export function getTokenGeneratorApp() {
   const APP_NAME = "custom-token-generation-app";
   const foundApp = admin.apps.find((app) => app && app.name === APP_NAME);
   if (foundApp) return foundApp;
@@ -21,48 +21,6 @@ function getTokenGeneratorApp() {
     } as any),
     databaseURL: `https://${FIREBASE_PROJECT_ID}.firebaseio.com`
   }, APP_NAME);
-}
-
-export async function signIn(email: string, password: string): Promise<CinemarcResponse> {
-  const URL = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_WEB_API_KEY}`;
-  // const securityResponse = await encrypt("JSON", { email: email, password: pass}, ["email", "password"])
-  const reqBody = JSON.stringify({
-    email,
-    password,
-    returnSecureToken: true
-  });
-
-  const response = await fetch(
-      URL,
-      {
-          method: "POST",
-          headers: {
-              "content-type": "application/json"
-          },
-          body: reqBody,
-      }
-  );
-  
-  const data = await response.json();
-
-  if (data.error) {
-    return { status: 401, data: null, message: "Wrong email or password" };
-  }
-
-  let authUser: UserRecord;
-  try {
-    authUser = await admin.auth().getUserByEmail(email);
-  } catch (error) {
-    return { status: 404, data: null, message: "User does not exist" };
-  }
-
-  const app = getTokenGeneratorApp();
-  if (!app) return { status: 500, data: null, message: "Server could not respond" };
-  const token = await app
-    .auth()
-    .createCustomToken(authUser.uid);
-
-  return { status: 200, data: { token }, message: null };
 }
 
 function sendInvitationEmail(email: string, userId: string): Promise<any> {

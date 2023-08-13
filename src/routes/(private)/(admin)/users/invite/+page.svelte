@@ -2,6 +2,8 @@
   import { createForm } from "felte";
   import Spinner from "../../../../../client/components/Spinner.svelte";
   import { toastStore, type ToastSettings } from "@skeletonlabs/skeleton";
+  import { CinemarcAPI } from "../../../../../client/cinemarc-api/cinemarc-api";
+  import type { CinemarcUserRank } from "../../../../../models/user.model";
 
   let formErrors: Record<string, string> = {};
   let invitingUser = false;
@@ -21,33 +23,24 @@
 
       invitingUser = true;
 
-      fetch("/api/send-user-invitation", {
-        method: "POST",
-        body: JSON.stringify({
-          email: values.email.trim(),
-          rank: values.rank.trim(),
-        }),
-      })
-        .then((res) => {
-          console.log(res);
-          if (res.ok) {
+      const email: string = values.email;
+      const rank: CinemarcUserRank = values.rank;
+
+      CinemarcAPI.auth.sendUserInvitation(email.trim(), rank)
+        .then(({ success, message }) => {
+          if (success) {
             const t = {
               message: 'Invitation sent 📨',
               background: 'variant-filled-success',
             };
             toastStore.trigger(t);
           } else {
-            return res.text().then((text) => { throw new Error(text) });
-          }
-          
-        })
-        .catch((error) => {
-          const t: ToastSettings = {
-              message: JSON.parse(error.message).message,
+            const t: ToastSettings = {
+              message,
               background: 'variant-filled-error',
             };
-          toastStore.trigger(t);
-          console.log(error);
+            toastStore.trigger(t);
+          }
         })
         .finally(() => {
           invitingUser = false;

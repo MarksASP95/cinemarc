@@ -6,8 +6,9 @@
   import { createPiece, updatePiece } from '../../client/pieces/piece.fire';
   import Spinner from '../../client/components/Spinner.svelte';
   import type { TMDBMovieSearchOutput, TMDBMovieSearchOutputResult, TMDBTVSearchOutput, TMDBTVSearchOutputResult } from '../../models/tmdb.model';
-  import { generatePosterSmallImg } from '../../client/pieces/pieces.api';
   import { onMount } from 'svelte';
+  import { getAuthorizationHeader } from '../../client/firebase/auth.fire';
+  import { CinemarcAPI } from '../../client/cinemarc-api/cinemarc-api';
 
   export let parent: any;
   export let success: Function;
@@ -48,7 +49,7 @@
       })
       .then((pieceId) => {
         if (data.imageUrl !== pieceToEdit?.imageUrl) {
-          data.imageUrl && generatePosterSmallImg(data.imageUrl, data.name!, pieceId);
+          data.imageUrl && CinemarcAPI.pieces.uploadPosterThumbnail(data.imageUrl, data.name!, pieceId);
         }
         success();
       })
@@ -149,7 +150,7 @@
         return createPiece(pieceCr);
       })
       .then((pieceId) => {
-        pieceCr.imageUrl && generatePosterSmallImg(pieceCr.imageUrl, pieceCr.name, pieceId);
+        pieceCr.imageUrl && CinemarcAPI.pieces.uploadPosterThumbnail(pieceCr.imageUrl, pieceCr.name, pieceId);
         success();
       })
       .catch((err) => {
@@ -228,12 +229,8 @@
       default: type = "movie";
     }
 
-    fetch("/api/search-movie-tmdb", {
-      method: "POST",
-      body: JSON.stringify({ searchText, type })
-    })
-      .then((res) => res.json())
-      .then(({ data }: { data: TMDBMovieSearchOutput | TMDBTVSearchOutput }) => {
+    CinemarcAPI.pieces.searchMovieInTMDB(searchText, type)
+      .then((data) => {
         if (data.results.length) {
           foundPieceConfig = {
             type,

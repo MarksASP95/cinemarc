@@ -6,6 +6,7 @@
   import { uploadFile } from "../../../../client/firebase/storage.fire";
   import { goto } from "$app/navigation";
   import { USERNAME_MAX_LENGTH, checkPassword, checkUsername } from "../../../../constants/user.const";
+  import { CinemarcAPI } from "../../../../client/cinemarc-api/cinemarc-api";
   
     export let data: { email: string, uid: string };
 
@@ -54,19 +55,15 @@
         submitting = true;
         uploadImageFile
             .then((url) => {
-                return fetch("/api/register", {
-                  method: "POST",
-                  body: JSON.stringify({
-                    userId,
-                    avatarUrl: url || null,
-                    username,
-                    password,
-                  }),
-                })
+                return CinemarcAPI.auth.register(
+                  userId,
+                  username,
+                  password,
+                  url || undefined,
+                )
             })
-            .then((res) => {
-                console.log(res)
-              if (res.ok) {
+            .then(({ success, message }) => {
+              if (success) {
                 const t = {
                   message: 'Welcome! 👐',
                   background: 'variant-filled-success',
@@ -74,13 +71,11 @@
                 toastStore.trigger(t);
                 goto("/login", { replaceState: true });
               } else {
-                res.json().then(({ message }) => {
-                    const t: ToastSettings = {
-                      message: message,
-                      background: 'variant-filled-error',
-                    };
-                    toastStore.trigger(t);
-                })
+                const t: ToastSettings = {
+                  message: message,
+                  background: 'variant-filled-error',
+                };
+                toastStore.trigger(t);
               }
               
             })
