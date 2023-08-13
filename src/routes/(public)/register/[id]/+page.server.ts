@@ -1,5 +1,5 @@
 import { error, redirect } from '@sveltejs/kit';
-import * as admin from "firebase-admin";
+import admin from "firebase-admin";
 import type { CinemarcUser } from '../../../../models/user.model.js';
 import { initializeFirebase } from '../../../../server/firebase.server.js';
 

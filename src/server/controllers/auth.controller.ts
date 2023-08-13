@@ -1,5 +1,5 @@
 import type { AuthUser, CinemarcUser, CinemarcUserRank } from "../../models/user.model";
-import * as admin from "firebase-admin";
+import admin from "firebase-admin";
 import type { CinemarcResponse } from "../../models/api.model";
 import { initializeFirebase } from "../firebase.server";
 import { getTransport } from "../utils.server";

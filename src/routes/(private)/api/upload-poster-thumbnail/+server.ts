@@ -1,7 +1,7 @@
 import type { RequestHandler } from './$types';
 import resizeImg from "resize-img";
 import { initializeFirebase } from '../../../../server/firebase.server';
-import * as admin from "firebase-admin";
+import admin from "firebase-admin";
 import { error, json } from '@sveltejs/kit';
 import type { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
 import type { Piece } from '../../../../models/piece.model';
