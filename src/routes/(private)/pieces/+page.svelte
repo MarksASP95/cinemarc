@@ -21,7 +21,6 @@
 
   let undoDeleteFn: Function | null = null;
   let undoConsumedFn: Function | null = null;
-  let latestConsumedState: boolean | null = null;
 
   function filterPiecesBySearch(_searchStr: string, pieces: Piece[] | null): Piece[] | null {
     if (!pieces) return null;
@@ -157,12 +156,13 @@
 
   function handlePieceConsumed(e: CustomEvent<{ pieceId: string, consumed: boolean }>) {
     const { pieceId, consumed } = e.detail;
-    // @ts-ignore
-    undoConsumedFn = undoConsumed.bind(this, pieceId, !consumed);
-    latestConsumedState = consumed;
-    setTimeout(() => {
-      if (!!undoConsumedFn) undoConsumedFn = null;
-    }, 4000);
+    if (consumed) {
+      // @ts-ignore
+      undoConsumedFn = undoConsumed.bind(this, pieceId, !consumed);
+      setTimeout(() => {
+        if (!!undoConsumedFn) undoConsumedFn = null;
+      }, 4000);
+    }
   }
 </script>
 
@@ -222,7 +222,7 @@
     Piece deleted &nbsp; <button on:click={() => undoDeleteFn ? undoDeleteFn() : null} type="button" class="btn btn-sm variant-ghost-success">undo</button>
   </div>
   <div class:undo-popup--second={!!undoDeleteFn} class:show={!!undoConsumedFn} class="undo-popup btn btn-sm bg-gradient-to-br variant-gradient-primary-tertiary">
-    Marked as {latestConsumedState ? '' : 'not '}consumed &nbsp; <button on:click={() => undoConsumedFn ? undoConsumedFn() : null} type="button" class="btn btn-sm variant-ghost-success">undo</button>
+    Marked as consumed &nbsp; <button on:click={() => undoConsumedFn ? undoConsumedFn() : null} type="button" class="btn btn-sm variant-ghost-success">undo</button>
   </div>
   <header class="cinemarc-header">
     <h1 class="text-center cinemarc-home">
