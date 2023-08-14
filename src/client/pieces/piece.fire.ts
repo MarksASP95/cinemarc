@@ -65,6 +65,7 @@ export function createPiece(pieceCr: PieceCreate): Promise<string> {
     releaseDate: pieceCr.releaseDate,
     smallImgUrl: null, 
     ownerId,
+    tmdbId: pieceCr.tmdbId
   };
   return setDoc(pieceDoc, piece)
     .then(() => pieceDoc.id);

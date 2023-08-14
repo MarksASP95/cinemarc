@@ -25,6 +25,7 @@
     description: false,
     release_date: false,
     image: false,
+    tmdbId: false,
   };
 
   let foundPieceConfig: {
@@ -68,6 +69,8 @@
         source,
         type,
         release_date = null,
+        tmdbId = null,
+        associate_with_result = true,
       } = values;
     
       const requiredFields = ["name", "source", "type"];
@@ -89,6 +92,7 @@
           name,
           source,
           type,
+          tmdbId: associate_with_result ? tmdbId : null,
         };
 
         updatePieceToDB(pieceUpdateData);
@@ -100,8 +104,8 @@
           source,
           type,
           releaseDate: release_date,
+          tmdbId: associate_with_result ? tmdbId : null,
         };
-  
         addPieceToDB(pieceCr)
       }
 
@@ -120,6 +124,10 @@
       setFields("source", pieceToEdit.source)
       foundImageUrl = pieceToEdit.imageUrl;
       setFields("release_date", pieceToEdit.releaseDate)
+      setFields("tmdbId", pieceToEdit.tmdbId || null);
+      setFields("associate_with_result", !!pieceToEdit.tmdbId);
+    } else {
+      setFields("associate_with_result", true);
     }
   });
 
@@ -195,6 +203,8 @@
     );
     setFields("description", result.overview, true);
     setFields("type", $data.type || "movie", true);
+    setFields("tmdbId", result.id);
+    setFields("associate_with_result", true);
 
     const releaseDateStr = 
       (result as TMDBMovieSearchOutputResult).release_date ||
@@ -211,6 +221,7 @@
       description: true,
       release_date: true,
       image: true,
+      tmdbId: true,
     };
   }
   
@@ -413,6 +424,12 @@
           type="date" 
         />
       </label>
+      {#if !!$data.tmdbId}
+        <label class="flex items-center space-x-2">
+          <input name="associate_with_result" type="checkbox" class="checkbox">
+          <p>Associate this piece with latest set result from TMDB</p>
+        </label>
+      {/if}
       <footer class="modal-footer {parent.regionFooter} justify-between">
           <!-- <button class="btn {parent.buttonNeutral}" on:click={parent.onClose}>{parent.buttonTextCancel}</button> -->
           <button type="button" on:click={() => close()}>close</button>
