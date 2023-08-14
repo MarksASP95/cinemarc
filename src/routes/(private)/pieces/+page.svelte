@@ -80,6 +80,7 @@
     const t: ToastSettings = {
       message: 'Piece updated! 🎉',
       background: 'variant-filled-success',
+      hideDismiss: true,
     };
     toastStore.trigger(t);
   }
@@ -112,6 +113,7 @@
     const t: ToastSettings = {
       message: 'Piece created! 🎉',
       background: 'variant-filled-success',
+      hideDismiss: true,
     };
     toastStore.trigger(t);
   }
