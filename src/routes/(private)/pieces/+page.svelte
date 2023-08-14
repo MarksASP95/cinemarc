@@ -21,6 +21,7 @@
 
   let undoDeleteFn: Function | null = null;
   let undoConsumedFn: Function | null = null;
+  let latestConsumedState: boolean | null = null;
 
   function filterPiecesBySearch(_searchStr: string, pieces: Piece[] | null): Piece[] | null {
     if (!pieces) return null;
@@ -140,8 +141,8 @@
     undoDeleteFn = null;
   }
   
-  function undoConsumed(pieceId: string) {
-    updatePiece(pieceId, { consumed: false });
+  function undoConsumed(pieceId: string, newValue: boolean) {
+    updatePiece(pieceId, { consumed: newValue });
     undoConsumedFn = null;
   }
 
@@ -154,10 +155,11 @@
     }, 4000);
   }
 
-  function handlePieceConsumed(e: CustomEvent<string>) {
-    const { detail: pieceId } = e;
+  function handlePieceConsumed(e: CustomEvent<{ pieceId: string, consumed: boolean }>) {
+    const { pieceId, consumed } = e.detail;
     // @ts-ignore
-    undoConsumedFn = undoConsumed.bind(this, pieceId);
+    undoConsumedFn = undoConsumed.bind(this, pieceId, !consumed);
+    latestConsumedState = consumed;
     setTimeout(() => {
       if (!!undoConsumedFn) undoConsumedFn = null;
     }, 4000);
@@ -220,7 +222,7 @@
     Piece deleted &nbsp; <button on:click={() => undoDeleteFn ? undoDeleteFn() : null} type="button" class="btn btn-sm variant-ghost-success">undo</button>
   </div>
   <div class:undo-popup--second={!!undoDeleteFn} class:show={!!undoConsumedFn} class="undo-popup btn btn-sm bg-gradient-to-br variant-gradient-primary-tertiary">
-    Marked as consumed &nbsp; <button on:click={() => undoConsumedFn ? undoConsumedFn() : null} type="button" class="btn btn-sm variant-ghost-success">undo</button>
+    Marked as {latestConsumedState ? '' : 'not '}consumed &nbsp; <button on:click={() => undoConsumedFn ? undoConsumedFn() : null} type="button" class="btn btn-sm variant-ghost-success">undo</button>
   </div>
   <header class="cinemarc-header">
     <h1 class="text-center cinemarc-home">
@@ -272,7 +274,7 @@
   <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
     {#if !!displayedPieces}
       {#each displayedPieces as piece, index (piece.id)}
-        <PieceCard on:pieceConsumed={handlePieceConsumed} on:pieceDeleted={handlePieceDeleted} on:editButtonClick={openEditModal} {piece} {index} />
+        <PieceCard on:pieceConsumedToggle={handlePieceConsumed} on:pieceDeleted={handlePieceDeleted} on:editButtonClick={openEditModal} {piece} {index} />
       {/each}
   
       <button on:click={handlePlusButtonClick} type="button" class="btn-icon btn-icon-xl variant-filled fixed bottom-6 right-6">

@@ -21,7 +21,7 @@
   const dispatch = createEventDispatcher<{ 
     editButtonClick: Piece, 
     pieceDeleted: string,
-    pieceConsumed: string,
+    pieceConsumedToggle: { pieceId: string, consumed: boolean; },
   }>();
 
   function handleEditButtonClick() {
@@ -94,7 +94,7 @@
   function setPieceConsumedState(pieceId: string, newState: boolean) {
     settingConsumedStateDict[pieceId] = true;
     updatePiece(pieceId, { consumed: newState })
-      .then(() => dispatch("pieceConsumed", piece.id))
+      .then(() => dispatch("pieceConsumedToggle", { pieceId, consumed: newState }))
       .finally(() => settingConsumedStateDict[pieceId] = false);
   }
 
