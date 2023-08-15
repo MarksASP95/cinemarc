@@ -172,7 +172,7 @@
               {#if submitting}
                 <Spinner forButton />
               {:else}
-                Invite
+                Register
               {/if}
             </button>
           </div>
