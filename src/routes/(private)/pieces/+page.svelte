@@ -111,10 +111,6 @@
     }
     modalStore.trigger(formModal);
   }
-  
-  function handleSignOutClick() {
-    signOut();
-  }
 
   function handleFormCreateSuccess() {
     modalStore.close();
@@ -179,16 +175,6 @@
 </script>
 
 <style lang="scss">
-  header.cinemarc-header {
-    height: 50px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    .cinemarc-home {
-      font-family: "Sono";
-    }
-  }
   .clear-search-button {
     max-width: 200px;
   }
@@ -242,28 +228,6 @@
   <div class:undo-popup--second={!!undoDeleteFn} class:show={!!undoConsumedFn} class="undo-popup btn btn-sm bg-gradient-to-br variant-gradient-primary-tertiary">
     Marked as consumed &nbsp; <button on:click={() => undoConsumedFn ? undoConsumedFn() : null} type="button" class="btn btn-sm variant-ghost-success">undo</button>
   </div>
-
-  {#if authUser}
-    <header class="cinemarc-header">
-      <h1 class="cinemarc-home">
-        cinemarc <span class="font-mono">({ authUser?.username || authUser?.email || '' })</span>
-      </h1>
-      <button on:click={handleSignOutClick} type="button" class="btn btn-sm bg-gradient-to-br variant-gradient-error-success">
-        <span>sign out</span>
-        <span>👋</span>
-      </button>
-    </header>
-  {:else}
-    <header class="cinemarc-header">
-      <div class="flex">
-        <h1 class="text-center cinemarc-home mr-3">
-          cinemarc
-        </h1>
-        <span class="placeholder animate-pulse" style="height: 25px; width: 100px;"></span>
-      </div>
-      <div class="placeholder animate-pulse" style="height: 32px; width: 100px;"></div>
-    </header>
-  {/if}
 
   {#if !displayedPieces} 
     <div class="search-bar mb-8">
