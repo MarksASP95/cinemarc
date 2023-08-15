@@ -239,7 +239,7 @@
 
   {#if authUser}
     <header class="cinemarc-header">
-      <h1 class="text-center cinemarc-home">
+      <h1 class="cinemarc-home">
         cinemarc <span class="font-mono">({ authUser?.username || authUser?.email || '' })</span>
       </h1>
       <button on:click={handleSignOutClick} type="button" class="btn btn-sm bg-gradient-to-br variant-gradient-error-success">
