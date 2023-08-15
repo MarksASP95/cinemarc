@@ -227,6 +227,12 @@
       }
     }
   }
+
+  .add-piece-btn {
+    svg {
+      fill: currentColor;
+    }
+  }
 </style>
 
 <section class="pieces-page">
@@ -308,8 +314,8 @@
         <PieceCard on:pieceConsumedToggle={handlePieceConsumed} on:pieceDeletedToggle={handlePieceDeleted} on:editButtonClick={openEditModal} {piece} {index} />
       {/each}
   
-      <button on:click={handlePlusButtonClick} type="button" class="btn-icon btn-icon-xl variant-filled fixed bottom-6 right-6">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="#000" width="24" height="24" viewBox="0 0 24 24"><path d="M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z"/></svg>
+      <button on:click={handlePlusButtonClick} type="button" class="add-piece-btn btn-icon btn-icon-xl variant-filled fixed bottom-6 right-6">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z"/></svg>
       </button>
     {:else}
       {#each [0, 0, 0, 0, 0, 0, 0, 0] as _}
