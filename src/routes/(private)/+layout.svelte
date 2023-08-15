@@ -1,10 +1,10 @@
 <style lang="scss">
   @mixin general_layout {
-    padding: 0 20px 20px;
+    padding: 0 20px 5px;
     max-width: 1920px;
     margin: 0 auto;
     @media (min-width: 768px) {
-      padding: 0 120px 40px;
+      padding: 0 120px 10px;
     }
   }
 
@@ -45,11 +45,16 @@
   import type { CinemarcUser } from '../../models/user.model';
   import { signOut } from '../../client/firebase/auth.fire';
   import { Drawer, LightSwitch, drawerStore } from '@skeletonlabs/skeleton';
+  import { cinemarcVersion$ } from '../../store/variables.store';
 
   let currentUser: CinemarcUser | undefined | null;
+  let version: string | undefined;
   onMount(() => {
     authUser$.subscribe((user) => {
       currentUser = user;
+    })
+    cinemarcVersion$.subscribe((v) => {
+      version = v?.value;
     })
   });
 
@@ -91,11 +96,17 @@
         </p>
         <!-- <Avatar src="" width="w-32" rounded="rounded-full" /> -->
       </div>
-      <div class="flex justify-center mt-4">
+      <div class="flex justify-center items-center flex-col mt-4">
         <button on:click={handleSignOutClick} type="button" class="btn btn-sm bg-gradient-to-br variant-gradient-error-success">
           <span>sign out</span>
           <span>👋</span>
         </button>
+
+        {#if !!version}
+          <small class="mt-4 text-xs text-tertiary-500">
+            Cinemarc {version}
+          </small>
+        {/if}
       </div>
     </div>
   </Drawer>

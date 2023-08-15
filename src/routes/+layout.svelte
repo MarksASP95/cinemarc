@@ -5,10 +5,12 @@
   import { browser } from "$app/environment";
   import { computePosition, autoUpdate, offset, shift, flip, arrow } from '@floating-ui/dom';
   import { storePopup } from '@skeletonlabs/skeleton';
+  import { initVersion } from "../client/version/version.fire";
   
   storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
   
   if (browser) {
+    initVersion();
     listenToAuthChanges();
   }
 </script>
