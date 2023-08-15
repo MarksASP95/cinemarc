@@ -1,4 +1,5 @@
 import { goto } from "$app/navigation";
+import { drawerStore } from "@skeletonlabs/skeleton";
 import { collection, doc, getDoc } from "firebase/firestore";
 import { get } from "svelte/store";
 import { authUser$, jwtToken$ } from "../../auth/auth.store";
@@ -13,7 +14,8 @@ const PUBLIC_ROUTES = [
 
 export function signOut() {
   auth().signOut();
-  location.reload();
+  drawerStore.close();
+  authUser$.set(null);
 }
 
 function fetchCurrentUser(uid: string): Promise<CinemarcUser | null> {

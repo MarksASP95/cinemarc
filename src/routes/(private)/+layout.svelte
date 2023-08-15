@@ -46,6 +46,12 @@
   import { signOut } from '../../client/firebase/auth.fire';
   import { Drawer, LightSwitch, drawerStore } from '@skeletonlabs/skeleton';
   import { cinemarcVersion$ } from '../../store/variables.store';
+  import { initMode } from '../../utils/mode.utils';
+  import { browser } from '$app/environment';
+
+  if (browser) {
+    initMode();
+  }
 
   let currentUser: CinemarcUser | undefined | null;
   let version: string | undefined;
