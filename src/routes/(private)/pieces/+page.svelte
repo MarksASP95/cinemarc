@@ -11,6 +11,7 @@
   import type { CinemarcUser } from "../../../models/user.model";
   import { signOut } from "../../../client/firebase/auth.fire";
   import { goto } from "$app/navigation";
+  import type { Unsubscribe } from "firebase/auth";
 
   let authUser: CinemarcUser | undefined;
   let searchStr = ""
@@ -28,9 +29,20 @@
     return pieces.filter((piece) => piece.name.toLocaleLowerCase().includes(_searchStr));
   }
 
+  let pieces$: Unsubscribe;
+  function init() {
+    pieces$ = getPieces((ps) => {
+      pieces = ps;
+    });
+  }
+
   onMount(() => {
     authUser$.subscribe((user) => {
       if (user === null) return goto("/login", { replaceState: true });
+      if (!authUser && !!user) {
+        authUser = user;
+        init();  
+      }
       authUser = user;
     });
     
@@ -57,12 +69,8 @@
     })
   })
 
-  const pieces$ = getPieces((ps) => {
-    pieces = ps;
-  });
-
   onDestroy(() => {
-    pieces$();
+    pieces$ && pieces$();
   });
 
   function handleSearchSubmit(e: any) {

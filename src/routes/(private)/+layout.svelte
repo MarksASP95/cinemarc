@@ -24,7 +24,5 @@
 </script>
 
 <main class="main-container">
-  {#if !!currentUser}
-    <slot />
-  {/if}
+  <slot />
 </main>
