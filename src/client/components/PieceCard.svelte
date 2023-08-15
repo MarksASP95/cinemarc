@@ -20,7 +20,7 @@
     false;
   const dispatch = createEventDispatcher<{ 
     editButtonClick: Piece, 
-    pieceDeleted: string,
+    pieceDeletedToggle: { pieceId: string, isDeleted: boolean; },
     pieceConsumedToggle: { pieceId: string, consumed: boolean; },
   }>();
 
@@ -101,7 +101,14 @@
   function handleDeleteButtonClick() {
     deletePiece(piece.id)
       .then(() => {
-        dispatch("pieceDeleted", piece.id);
+        dispatch("pieceDeletedToggle", { pieceId: piece.id, isDeleted: true });
+      });
+  }
+
+  function handleRestoreButtonClick() {
+    updatePiece(piece.id, { isDeleted: false, deletedAt: null })
+      .then(() => {
+        dispatch("pieceDeletedToggle", { pieceId: piece.id, isDeleted: false });
       });
   }
 
@@ -216,9 +223,15 @@
         Edit ✏️
       </button>
 
-      <button on:click={handleDeleteButtonClick} type="button" class="btn variant-filled-error btn-sm">
-        Delete 🗑️
+      {#if piece.isDeleted}
+      <button on:click={handleRestoreButtonClick} type="button" class="btn variant-filled-success btn-sm">
+        Restore ↩️
       </button>
+      {:else}
+        <button on:click={handleDeleteButtonClick} type="button" class="btn variant-filled-error btn-sm">
+          Delete 🗑️
+        </button>
+      {/if}
     </div>
   </div>
   <header 

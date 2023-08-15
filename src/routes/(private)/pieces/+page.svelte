@@ -155,13 +155,15 @@
     undoConsumedFn = null;
   }
 
-  function handlePieceDeleted(e: CustomEvent<string>) {
-    const { detail: pieceId } = e;
-    // @ts-ignore
-    undoDeleteFn = undoDelete.bind(this, pieceId);
-    setTimeout(() => {
-      if (!!undoDeleteFn) undoDeleteFn = null;
-    }, 4000);
+  function handlePieceDeleted(e: CustomEvent<{ pieceId: string; isDeleted: boolean }>) {
+    const { pieceId, isDeleted } = e.detail;
+    if (isDeleted) {
+      // @ts-ignore
+      undoDeleteFn = undoDelete.bind(this, pieceId);
+      setTimeout(() => {
+        if (!!undoDeleteFn) undoDeleteFn = null;
+      }, 4000);
+    }
   }
 
   function handlePieceConsumed(e: CustomEvent<{ pieceId: string, consumed: boolean }>) {
@@ -303,7 +305,7 @@
   <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
     {#if !!displayedPieces}
       {#each displayedPieces as piece, index (piece.id)}
-        <PieceCard on:pieceConsumedToggle={handlePieceConsumed} on:pieceDeleted={handlePieceDeleted} on:editButtonClick={openEditModal} {piece} {index} />
+        <PieceCard on:pieceConsumedToggle={handlePieceConsumed} on:pieceDeletedToggle={handlePieceDeleted} on:editButtonClick={openEditModal} {piece} {index} />
       {/each}
   
       <button on:click={handlePlusButtonClick} type="button" class="btn-icon btn-icon-xl variant-filled fixed bottom-6 right-6">
