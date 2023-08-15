@@ -52,6 +52,7 @@
             const t: ToastSettings = {
               message: 'Wrong username, email or password 🕵️‍♂️',
               background: 'variant-filled-error',
+              hideDismiss: true,
             };
             toastStore.trigger(t);
             submitting = false;

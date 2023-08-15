@@ -135,6 +135,7 @@
     const t: ToastSettings = {
       message: 'Something went wrong 😕',
       background: 'variant-filled-error',
+      hideDismiss: true,
     };
     toastStore.trigger(t);
   }
@@ -258,6 +259,7 @@
           const t: ToastSettings = {
             message: 'Couldn\'t find anything 👉👈',
             background: 'variant-filled-warning',
+            hideDismiss: true,
           };
           toastStore.trigger(t);
         }

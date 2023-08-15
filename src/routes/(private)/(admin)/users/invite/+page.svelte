@@ -38,6 +38,7 @@
             const t: ToastSettings = {
               message,
               background: 'variant-filled-error',
+              hideDismiss: true,
             };
             toastStore.trigger(t);
           }

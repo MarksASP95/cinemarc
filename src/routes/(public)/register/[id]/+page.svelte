@@ -74,6 +74,7 @@
                 const t: ToastSettings = {
                   message: message,
                   background: 'variant-filled-error',
+                  hideDismiss: true,
                 };
                 toastStore.trigger(t);
               }
@@ -83,6 +84,7 @@
               const t: ToastSettings = {
                   message: "An error ocurred. Try  again",
                   background: 'variant-filled-error',
+                  hideDismiss: true,
                 };
               toastStore.trigger(t);
               console.log(error);
