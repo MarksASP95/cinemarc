@@ -28,6 +28,7 @@
     tmdbId: false,
   };
 
+  let loadingTMDBPoster = false;
   let foundPieceConfig: {
     results: (TMDBMovieSearchOutputResult | TMDBTVSearchOutputResult)[];
     currentResultIndex: number;
@@ -217,6 +218,14 @@
     foundImageUrl = `https://image.tmdb.org/t/p/original${result.poster_path}`;
     imageFile = null;
 
+    const img = new Image();
+    img.src = foundImageUrl;
+    loadingTMDBPoster = true;
+
+    img.onload = () => {
+        loadingTMDBPoster = false
+    };
+
     fromResultMap = {
       name: true,
       description: true,
@@ -389,6 +398,7 @@
           <small class="text-error-500">{formErrors.source}</small>
         {/if}
       </label>
+
       {#if foundImageUrl}
         <a
           href={foundImageUrl}
@@ -399,7 +409,13 @@
           class:bg-gradient-to-br={!!fromResultMap.image}
           class:variant-gradient-success-warning={!!fromResultMap.image}
         >
+        {#if loadingTMDBPoster}
+          <div class="h-24 md:h-40 lg:h-48 flex justify-center items-center">
+            <Spinner />
+          </div>
+        {:else}
           <img src={foundImageUrl} class="block w-full h-24 md:h-40 lg:h-48 object-cover rounded" alt="Found poster"/>
+        {/if}
         </a>
       {/if}
       <label class="label">
