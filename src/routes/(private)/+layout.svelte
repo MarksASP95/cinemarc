@@ -44,7 +44,7 @@
   import { authUser$ } from '../../auth/auth.store';
   import type { CinemarcUser } from '../../models/user.model';
   import { signOut } from '../../client/firebase/auth.fire';
-  import { Drawer, drawerStore } from '@skeletonlabs/skeleton';
+  import { Drawer, LightSwitch, drawerStore } from '@skeletonlabs/skeleton';
 
   let currentUser: CinemarcUser | undefined | null;
   onMount(() => {
@@ -72,6 +72,9 @@
 {#if !!currentUser}
   <Drawer>
     <div class="drawer-content">
+      <div class="flex justify-end">
+        <LightSwitch />
+      </div>
       <div class="flex justify-center items-center flex-col pb-4">
         <div class="rounded-full w-16 h-16 overflow-hidden flex justify-center items-center variant-glass-surface">
           {#if currentUser.avatarUrl}
