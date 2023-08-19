@@ -33,7 +33,8 @@ export type PieceEditable = Partial<Pick<Piece,
   "name" | 
   "source" | 
   "type" |
-  "tmdbId"
+  "tmdbId" |
+  "releaseDate"
 >>;
 
 type PieceFixedValueFilterKeys = Pick<Piece, "consumed" | "isDeleted" | "source" | "type">;

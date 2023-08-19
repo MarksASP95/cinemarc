@@ -94,6 +94,7 @@
           source,
           type,
           tmdbId: associate_with_result ? tmdbId : null,
+          releaseDate: release_date || null,
         };
 
         updatePieceToDB(pieceUpdateData);
