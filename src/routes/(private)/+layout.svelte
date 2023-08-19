@@ -62,6 +62,21 @@
     cinemarcVersion$.subscribe((v) => {
       version = v?.value;
     })
+
+    function handlePopState() {
+      drawerStore.close();
+    }
+    drawerStore.subscribe(({ open }) => {
+      if (open) {
+        window.location.hash = 'drawer';
+        addEventListener("popstate", handlePopState);
+      } else {
+        if (window.location.hash) {
+          history.replaceState({}, document.title, window.location.href.split('#')[0]);
+        }
+        removeEventListener("popstate", handlePopState)
+      }
+    })
   });
 
   function handleSignOutClick() {
