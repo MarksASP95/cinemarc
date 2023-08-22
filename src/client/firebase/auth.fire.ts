@@ -2,7 +2,7 @@ import { goto } from "$app/navigation";
 import { drawerStore } from "@skeletonlabs/skeleton";
 import { collection, doc, getDoc } from "firebase/firestore";
 import { get } from "svelte/store";
-import { authUser$, jwtToken$ } from "../../auth/auth.store";
+import { authUser$, jwtToken$, rankClaim$ } from "../../auth/auth.store";
 import type { CinemarcUser } from "../../models/user.model";
 import { auth } from "../../store/firebase-auth.store";
 import { firestore } from "../../store/firebase-firestore.store";
@@ -11,6 +11,10 @@ const PUBLIC_ROUTES = [
   "login",
   "register",
 ];
+
+const ADMIN_ROUTES = [
+  "admin",
+]
 
 export function signOut() {
   auth().signOut();
@@ -33,14 +37,25 @@ export function listenToAuthChanges() {
     (authState) => {
       const locationName = window.location.pathname.split("/")[1];
       const routeIsPublic = !!PUBLIC_ROUTES.find((route) => route.includes(locationName));
+      const routeIsForAdmin = !!ADMIN_ROUTES.find((route) => route.includes(locationName));
       if (!authState) {
-        if (get(authUser$) || !routeIsPublic) {
+        if (get(authUser$) || !routeIsPublic || routeIsForAdmin) {
           goto("/login", { replaceState: true });
         }
         authUser$.set(null);
         jwtToken$.set(null);
+        rankClaim$.set(null);
         return;
       }
+
+      authState.getIdTokenResult()
+        .then((value) => {
+          rankClaim$.set((value.claims["rank"] as any) || null);
+        })
+        .catch(() => {
+          rankClaim$.set(undefined);
+        });
+
 
       if (routeIsPublic) goto("/pieces", { replaceState: true });
 
