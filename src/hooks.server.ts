@@ -20,11 +20,11 @@ async function checkAuthentication(
   try {
     const decodedToken = await admin.auth().verifyIdToken(token);
 
-    if (rank === "admin") {
+    if (rank) {
       const { uid } = decodedToken;
-      const userSnap = await admin.firestore().collection("users").doc(uid).get();
-      const user = userSnap.data() as CinemarcUser;
-      if (user.rank !== "admin") {
+      const authUser = await admin.auth().getUser(uid);
+      const rankClaim = authUser.customClaims?.["rank"] as CinemarcUserRank || undefined;
+      if (rankClaim !== rank && rankClaim !== "admin") {
         if (throwUnauthorized) throw error(403, { message: "Unauthorized " });
         return false;
       }
