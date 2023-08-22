@@ -13,7 +13,7 @@ export function getTokenGeneratorApp() {
   const foundApp = admin.apps.find((app) => app && app.name === APP_NAME);
   if (foundApp) return foundApp;
 
-  admin.initializeApp({
+  return admin.initializeApp({
     credential: admin.credential.cert({
       project_id: FIREBASE_PROJECT_ID,
       private_key: FIREBASE_PRIVATE_KEY,
