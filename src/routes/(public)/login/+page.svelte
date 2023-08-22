@@ -20,7 +20,6 @@
 
   const { form: loginForm } = createForm({
     onSubmit: (values) => {
-      submitting = true;
       const requiredFields = ["usernameOrEmail", "password"];
         const errors: Record<string, string> = {};
         requiredFields.forEach((field) => {
@@ -34,6 +33,7 @@
 
         const { usernameOrEmail, password } = values;
 
+        submitting = true;
         CinemarcAPI.auth.signIn(usernameOrEmail, password)
         .then((token) => {
           if (token) {
