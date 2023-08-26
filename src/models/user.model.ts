@@ -19,3 +19,8 @@ export interface AuthUser {
   uid: string;
   email: string;
 }
+
+export type SignInResult 
+  = "wrong_credentials" | "user_not_active" | 
+    "server_could_not_respond" | "user_does_not_exist" | 
+    "success";

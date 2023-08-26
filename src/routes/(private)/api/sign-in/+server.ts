@@ -1,7 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { createAuthUserWithInvitation, createInvitation, getTokenGeneratorApp } from '../../../../server/controllers/auth.controller';
-import type { CinemarcUser, CinemarcUserRank } from '../../../../models/user.model';
+import type { CinemarcUser, CinemarcUserRank, SignInResult } from '../../../../models/user.model';
 import { checkPassword, checkUsername } from '../../../../constants/user.const';
 import { FIREBASE_WEB_API_KEY } from '$env/static/private';
 import { initializeFirebase } from '../../../../server/firebase.server';
@@ -50,23 +50,31 @@ export const POST = (async (event) => {
   const data = await response.json();
 
   if (data.error) {
-    throw error(401, { message: "Wrong email or password" });
+    throw error(401, { message: <SignInResult>"wrong_credentials" });
   }
 
   let authUser: UserRecord;
   try {
     authUser = await admin.auth().getUserByEmail(email);
   } catch (e) {
-    throw error(401, { message: "Wrong email or password" });
+    throw error(401, { message: <SignInResult>"wrong_credentials" });
   }
 
+  const cinemarcUserSnap = await admin.firestore().collection("users").doc(authUser.uid).get();
+  if (!cinemarcUserSnap.exists) throw error(403, { message: <SignInResult>"user_does_not_exist" });
+
+  const cinemarcUser = cinemarcUserSnap.data() as CinemarcUser;
+  if (!cinemarcUser.isActive || cinemarcUser.isDeleted) {
+    throw error(403, { message: <SignInResult>"user_not_active" });
+  }
+  
   const app = getTokenGeneratorApp();
-  if (!app) throw error(500, { message: "Server could not respond" });
+  if (!app) throw error(500, { message: <SignInResult>"server_could_not_respond" });
   const token = await app
     .auth()
     .createCustomToken(authUser.uid);
 
   event.cookies.set('cinemarc-auth-token', token, { httpOnly: true, secure: true, path: '/' });
 
-  return json({ token });
+  return json({ token, message: <SignInResult>"success" });
 }) satisfies RequestHandler;

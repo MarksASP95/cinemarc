@@ -8,6 +8,7 @@
   import { authUser$ } from "../../../auth/auth.store";
   import { auth } from "../../../store/firebase-auth.store";
   import { CinemarcAPI } from "../../../client/cinemarc-api/cinemarc-api";
+  import type { SignInResult } from "../../../models/user.model";
 
   let submitting = false;
   let formErrors: Record<string, string> = {};
@@ -17,6 +18,14 @@
       if (!!user) return goto("/pieces", { replaceState: true });
     })
   });
+
+  const signInResultDict: Record<SignInResult, string> = {
+    server_could_not_respond: "Server could not respond",
+    success: "Welcome back! ❤️",
+    user_does_not_exist: "User does not exist",
+    user_not_active: "User not active",
+    wrong_credentials: "Wrong username, email or password 🕵️‍♂️",
+  }
 
   const { form: loginForm } = createForm({
     onSubmit: (values) => {
@@ -35,12 +44,12 @@
 
         submitting = true;
         CinemarcAPI.auth.signIn(usernameOrEmail, password)
-        .then((token) => {
+        .then(({ token, message }) => {
           if (token) {
             signInWithCustomToken(auth(), token)
               .then(() => {
                 const t: ToastSettings = {
-                  message: 'Welcome back! ❤️',
+                  message: signInResultDict["success"],
                   background: 'variant-filled-success',
                   hideDismiss: true,
                   timeout: 800,
@@ -50,7 +59,7 @@
               })
           } else {
             const t: ToastSettings = {
-              message: 'Wrong username, email or password 🕵️‍♂️',
+              message: signInResultDict[message as SignInResult] || "An error has ocurred",
               background: 'variant-filled-error',
               hideDismiss: true,
             };

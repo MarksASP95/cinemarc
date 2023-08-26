@@ -31,8 +31,11 @@ export const CinemarcAPI = {
         })
       })
       .then((res) => res.json())
-      .then(({ token }) => {
-        return (token as string) || null;
+      .then(({ token, message }) => {
+        return {
+          token: token || null,
+          message,
+        }
       })
     },
     sendUserInvitation: (email: string, rank: CinemarcUserRank) => {
