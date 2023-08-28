@@ -30,9 +30,6 @@
       padding-top: 40px;
     }
 
-    .initial-text {
-      font-family: "Sono";
-    }
     .username {
       font-family: "Sono";
     }
@@ -40,27 +37,37 @@
 </style>
 
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { authUser$ } from '../../auth/auth.store';
+  import { onDestroy, onMount } from 'svelte';
+  import { authUser$, rankClaim$ } from '../../auth/auth.store';
   import type { CinemarcUser } from '../../models/user.model';
   import { signOut } from '../../client/firebase/auth.fire';
   import { Drawer, LightSwitch, drawerStore } from '@skeletonlabs/skeleton';
   import { cinemarcVersion$ } from '../../store/variables.store';
   import { initMode } from '../../utils/mode.utils';
   import { browser } from '$app/environment';
+  import UserInitials from '../../client/components/UserInitials.svelte';
+  import type { Unsubscribe } from 'firebase/auth';
 
   if (browser) {
     initMode();
   }
 
+  let isAdmin: boolean;
   let currentUser: CinemarcUser | undefined | null;
   let version: string | undefined;
+
+  let authUserSub: Unsubscribe;
+  let versionSub: Unsubscribe;
+  let rankSub: Unsubscribe;
   onMount(() => {
-    authUser$.subscribe((user) => {
+    authUserSub = authUser$.subscribe((user) => {
       currentUser = user;
     })
-    cinemarcVersion$.subscribe((v) => {
+    versionSub = cinemarcVersion$.subscribe((v) => {
       version = v?.value;
+    })
+    rankSub = rankClaim$.subscribe((rank) => {
+      isAdmin = rank === "admin";
     })
 
     function handlePopState() {
@@ -79,6 +86,12 @@
     })
   });
 
+  onDestroy(() => {
+    if (authUserSub) authUserSub();
+    if (versionSub) versionSub();
+    if (rankSub) rankSub();
+  })
+
   function handleSignOutClick() {
     signOut();
   }
@@ -88,10 +101,6 @@
       position: "top",
       height: "auto",
     });
-  }
-
-  function getUsernameInitial(username: string): string {
-    return username[0];
   }
 </script>
 
@@ -106,9 +115,7 @@
           {#if currentUser.avatarUrl}
             <img class="object-cover" src={currentUser.avatarUrl} alt={currentUser.username}>
           {:else}
-            <p class="text-center initial-text text-2xl">
-              {getUsernameInitial(currentUser.username)}
-            </p>
+            <UserInitials username={currentUser.username} />
           {/if}
         </div>
 
@@ -117,6 +124,13 @@
         </p>
         <!-- <Avatar src="" width="w-32" rounded="rounded-full" /> -->
       </div>
+
+      {#if isAdmin}
+        <a class="text-center block hover:underline" href="/admin">
+          <small>admin dashboard</small>
+        </a>
+      {/if}
+
       <div class="flex justify-center items-center flex-col mt-4">
         <button on:click={handleSignOutClick} type="button" class="btn btn-sm bg-gradient-to-br variant-gradient-error-success">
           <span>sign out</span>
@@ -137,7 +151,7 @@
   {#if currentUser}
     <header class="cinemarc-header">
       <h1 class="cinemarc-home">
-        cinemarc <span class="font-mono">({ currentUser?.username || currentUser?.email || '' })</span>
+        <a class="hover:underline" href="/">cinemarc</a> <span class="font-mono">({ currentUser?.username || currentUser?.email || '' })</span>
       </h1>
       <button on:click={openDrawer} type="button" class="btn btn-sm bg-gradient-to-br variant-gradient-tertiary-secondary">
         <span>⚙️</span>
