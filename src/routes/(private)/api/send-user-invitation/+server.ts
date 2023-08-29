@@ -5,7 +5,7 @@ import type { CinemarcUserRank } from '../../../../models/user.model';
 import type { CinemarcResponse } from '../../../../models/api.model';
 
 export const POST = (async (event) => {
-  const { email, rank } = await event.request.json();
+  const { email } = await event.request.json();
 
   if (typeof email !== "string") {
     throw error(400, { message: "Email must be a string" });
@@ -13,18 +13,10 @@ export const POST = (async (event) => {
   if (!email) {
     throw error(400, { message: "Email is required" });
   }
-  if (!rank) {
-    throw error(400, { message: "Rank is required" });
-  }
-  try {
-    (rank as any) satisfies CinemarcUserRank;
-  } catch (e) {
-    throw error(400, { message: "Rank value is not valid" });
-  }
 
   let response: CinemarcResponse<any>;
   try {
-    response = await createInvitation(email, rank)
+    response = await createInvitation(email)
   } catch (error) {}
 
   if (response!.status === 200) {

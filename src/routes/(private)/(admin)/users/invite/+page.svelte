@@ -24,9 +24,8 @@
       invitingUser = true;
 
       const email: string = values.email;
-      const rank: CinemarcUserRank = values.rank;
 
-      CinemarcAPI.auth.sendUserInvitation(email.trim(), rank)
+      CinemarcAPI.auth.sendUserInvitation(email.trim())
         .then(({ success, message }) => {
           if (success) {
             const t = {
@@ -67,17 +66,6 @@
       />
       {#if formErrors.email}
         <small class="text-error-500">{formErrors.email}</small>
-      {/if}
-    </label>
-    <label class="label">
-      <span>Rank</span>
-      <select name="rank" class="select" disabled={invitingUser}>
-        <option value="" selected disabled>Select a rank</option>
-        <option value="user">User</option>
-        <option value="admin">Admin</option>
-      </select>
-      {#if formErrors.rank}
-        <small class="text-error-500">{formErrors.rank}</small>
       {/if}
     </label>
     <footer class="modal-footer">

@@ -38,10 +38,10 @@ export const CinemarcAPI = {
         }
       })
     },
-    sendUserInvitation: (email: string, rank: CinemarcUserRank) => {
+    sendUserInvitation: (email: string) => {
       return fetch("/api/send-user-invitation", {
         method: "POST",
-        body: JSON.stringify({ email, rank }),
+        body: JSON.stringify({ email }),
         headers: { ...getAuthorizationHeader() },
       })
       .then((res) => {

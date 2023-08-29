@@ -37,7 +37,7 @@ function sendInvitationEmail(email: string, userId: string): Promise<any> {
     });
 }
 
-export async function createInvitation(email: string, rank: CinemarcUserRank): Promise<CinemarcResponse> {
+export async function createInvitation(email: string): Promise<CinemarcResponse> {
   try {
     await admin.auth().getUserByEmail(email);
     return { status: 412, message: "User already exists", data: null };
@@ -51,7 +51,6 @@ export async function createInvitation(email: string, rank: CinemarcUserRank): P
     
   const invitedUserDoc = userOnDBSnap.docs[0];
   if (invitedUserDoc) {
-    await invitedUserDoc.ref.update({ rank });
     await sendInvitationEmail(email, invitedUserDoc.id);
   } else {
     const userDoc = admin.firestore().collection("users").doc();
@@ -64,7 +63,7 @@ export async function createInvitation(email: string, rank: CinemarcUserRank): P
       id: userDoc.id,
       isActive: false,
       isDeleted: false,
-      rank,
+      rank: "user",
       username: "",
     };
   
