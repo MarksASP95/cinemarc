@@ -23,7 +23,7 @@ async function checkAuthentication(
     if (rank) {
       const { uid } = decodedToken;
       const authUser = await admin.auth().getUser(uid);
-      const rankClaim = authUser.customClaims?.["rank"] as CinemarcUserRank || undefined;
+      const rankClaim = (authUser.customClaims?.["rank"] || "user") as CinemarcUserRank || undefined;
       if (rankClaim !== rank && rankClaim !== "admin") {
         if (throwUnauthorized) throw error(403, { message: "Unauthorized " });
         return false;
