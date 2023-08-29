@@ -95,6 +95,7 @@ export async function createAuthUserWithInvitation(userId: string, password: str
   }
 
   await admin.auth().createUser({ email, password, uid: userId });
+  await admin.auth().setCustomUserClaims(userId, { rank: "user" });
   const userUpdateData: Partial<CinemarcUser> = {
     authStatus: "complete",
     isActive: true,
