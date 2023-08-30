@@ -51,7 +51,21 @@ export const CinemarcAPI = {
             return { success: false, message };
           });
       })
-    }
+    },
+    blockUser: (userId: string, isBlocked: boolean) => {
+      return fetch("/api/block-user", {
+        method: "POST",
+        body: JSON.stringify({ userId, block: !isBlocked, unblock: isBlocked }),
+        headers: { ...getAuthorizationHeader() },
+      })
+      .then((res) => {
+        if (res.ok) return { success: res.ok, message: null };
+        return res.json()
+          .then(({ message }) => {
+            return { success: false, message };
+          });
+      });
+    },
   },
   pieces: {
     searchMovieInTMDB: (searchText: string, type: string) => {

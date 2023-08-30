@@ -52,6 +52,10 @@ export const first: Handle = async  ({ event, resolve }) => {
       await checkAuthentication(event);
       break;
     }
+    case "/api/block-user": {
+      await checkAuthentication(event, { rank: "admin" });
+      break;
+    }
   }
   return resolve(event);
 }
