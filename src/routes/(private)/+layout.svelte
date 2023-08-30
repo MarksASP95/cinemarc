@@ -37,7 +37,7 @@
 </style>
 
 <script lang="ts">
-  import { onDestroy, onMount } from 'svelte';
+  import { onMount } from 'svelte';
   import { authUser$, rankClaim$ } from '../../auth/auth.store';
   import type { CinemarcUser } from '../../models/user.model';
   import { signOut } from '../../client/firebase/auth.fire';
@@ -59,6 +59,11 @@
   let authUserSub: Unsubscribe;
   let versionSub: Unsubscribe;
   let rankSub: Unsubscribe;
+
+  function handlePopState() {
+    drawerStore.close();
+  }
+
   onMount(() => {
     authUserSub = authUser$.subscribe((user) => {
       currentUser = user;
@@ -70,9 +75,6 @@
       isAdmin = rank === "admin";
     })
 
-    function handlePopState() {
-      drawerStore.close();
-    }
     drawerStore.subscribe(({ open }) => {
       if (open) {
         window.location.hash = 'drawer';
@@ -84,13 +86,14 @@
         removeEventListener("popstate", handlePopState)
       }
     })
-  });
 
-  onDestroy(() => {
-    if (authUserSub) authUserSub();
-    if (versionSub) versionSub();
-    if (rankSub) rankSub();
-  })
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+      if (authUserSub) authUserSub();
+      if (versionSub) versionSub();
+      if (rankSub) rankSub();
+    };
+  });
 
   function handleSignOutClick() {
     signOut();

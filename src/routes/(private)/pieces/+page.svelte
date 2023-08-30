@@ -67,11 +67,11 @@
         document.body.style.overflow = "initial";
       }
     })
-  })
 
-  onDestroy(() => {
-    pieces$ && pieces$();
-  });
+    return () => {
+      pieces$ && pieces$();
+    }
+  })
 
   function handleSearchSubmit(e: any) {
     if (e.key !== "Enter") return;
