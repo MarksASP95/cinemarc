@@ -113,7 +113,9 @@
   }
 
   function formatReleaseDate(dateStr: string) {
+    const dateTimeOffset = new Date().getTimezoneOffset();
     const date = new Date(dateStr);
+    date.setMinutes(date.getMinutes() + dateTimeOffset);
     return new Intl.DateTimeFormat(
       "GB", 
       { 
