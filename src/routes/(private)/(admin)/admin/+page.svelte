@@ -10,18 +10,6 @@
   getUsers((u) => {
     users = u;
   })
-
-  function handlePopState() {
-    goto("/pieces");
-  }
-
-  onMount(() => {
-    addEventListener("popstate", handlePopState);
-
-    return () => {
-      removeEventListener("popstate", handlePopState);
-    }
-  })
 </script>
 
 <style lang="scss">

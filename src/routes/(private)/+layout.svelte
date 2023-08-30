@@ -60,10 +60,6 @@
   let versionSub: Unsubscribe;
   let rankSub: Unsubscribe;
 
-  function handlePopState() {
-    drawerStore.close();
-  }
-
   onMount(() => {
     authUserSub = authUser$.subscribe((user) => {
       currentUser = user;
@@ -77,20 +73,13 @@
 
     drawerStore.subscribe(({ open }) => {
       if (open) {
-        window.location.hash = 'drawer';
-        addEventListener("popstate", handlePopState);
         document.body.style.overflow = "hidden";
       } else {
-        if (window.location.hash) {
-          history.replaceState({}, document.title, window.location.href.split('#')[0]);
-        }
-        removeEventListener("popstate", handlePopState)
         document.body.style.overflow = "initial";
       }
     })
 
     return () => {
-      window.removeEventListener("popstate", handlePopState);
       if (authUserSub) authUserSub();
       if (versionSub) versionSub();
       if (rankSub) rankSub();
