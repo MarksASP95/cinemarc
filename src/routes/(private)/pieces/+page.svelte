@@ -247,7 +247,7 @@
         tabindex="1" 
         class="input" 
         type="text" 
-        placeholder="Search for a movie, series, podcast, or anything" 
+        placeholder="Search in your pieces" 
       />
     </div>
   {/if}
