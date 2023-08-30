@@ -64,7 +64,7 @@ export const POST = (async (event) => {
   if (!cinemarcUserSnap.exists) throw error(403, { message: <SignInResult>"user_does_not_exist" });
 
   const cinemarcUser = cinemarcUserSnap.data() as CinemarcUser;
-  if (!cinemarcUser.isActive || cinemarcUser.isDeleted) {
+  if (!cinemarcUser.isActive || cinemarcUser.isDeleted || !!authUser.customClaims?.["isBlocked"]) {
     throw error(403, { message: <SignInResult>"user_not_active" });
   }
   
