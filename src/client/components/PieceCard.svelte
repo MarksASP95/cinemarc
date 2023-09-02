@@ -1,10 +1,11 @@
 <script lang="ts">
   import type { Piece, PieceSource, PieceType } from "../../models/piece.model";
   import { pieceTypeDict } from "../../constants/piece.const";
-  import { popup, type PopupSettings } from "@skeletonlabs/skeleton";
+  import { popup, toastStore, type PopupSettings } from "@skeletonlabs/skeleton";
   import { deletePiece, setConsumedValue, updatePiece } from "../pieces/piece.fire";
   import { createEventDispatcher } from "svelte";
   import { minimizeDate } from "../../utils/time.utils";
+  import Spinner from "./Spinner.svelte";
 
   export let piece: Piece;
   export let index: number;
@@ -23,6 +24,37 @@
     pieceDeletedToggle: { pieceId: string, isDeleted: boolean; },
     pieceConsumedToggle: { pieceId: string, consumed: boolean; },
   }>();
+
+  let settingSource = false;
+
+  let sourceOptions
+  : { suggested: PieceSource[], other: PieceSource[] }
+  = {
+    suggested: [],
+    other: [],
+  }
+
+  $: {
+    switch (piece.source) {
+      case "unknown": {
+        sourceOptions = {
+          suggested: ["torrent_file", "downloaded", "netflix", "prime_video", "mubi"],
+          other: ["hbo_max", "physical", "spotify", "theater", "web", "youtube"],
+        }
+        break
+      }
+      case "torrent_file": {
+        sourceOptions = {
+          suggested: ["downloaded"],
+          other: [],
+        }
+        break
+      }
+      default: {
+        sourceOptions = { suggested: [], other: [], };
+      }
+    }
+  }
 
   function handleEditButtonClick() {
     dispatch("editButtonClick", piece);
@@ -63,13 +95,13 @@
   const settingConsumedStateDict: Record<string, boolean> = {};
 
   const consumedStateTextyPieceType: Record<PieceType, [string, string]> = {
-    book: ["Mark as read", "Mark as not read"],
-    documentary: ["Mark as watched", "Mark as not watched"],
-    movie: ["Mark as watched", "Mark as not watched"],
-    music: ["Mark as listened", "Mark as not listened"],
-    podcast: ["Mark as listened", "Mark as not listened"],
-    series: ["Mark as watched", "Mark as not watched"],
-    video: ["Mark as watched", "Mark as not watched"],
+    book: ["Read", "Not read"],
+    documentary: ["Watched", "Not watched"],
+    movie: ["Watched", "Not watched"],
+    music: ["Listened", "Not listened"],
+    podcast: ["Listened", "Not listened"],
+    series: ["Watched", "Not watched"],
+    video: ["Watched", "Not watched"],
   };
 
   const loadedImagesDict: Record<string, boolean> = {};
@@ -110,6 +142,25 @@
       .then(() => {
         dispatch("pieceDeletedToggle", { pieceId: piece.id, isDeleted: false });
       });
+  }
+
+  function setSource(source: PieceSource) {
+    settingSource = true;
+    updatePiece(piece.id, { source })
+      .then(() => {
+        toastStore.trigger({
+          message: "Status set",
+          background: 'variant-filled-success',
+        });
+      })
+      .catch((err) => {
+        console.log(err)
+        toastStore.trigger({
+          message: "An error ocurred",
+          background: 'variant-filled-error',
+        });
+      })
+      .finally(() => settingSource = false)
   }
 
   function formatReleaseDate(dateStr: string) {
@@ -199,42 +250,90 @@
 </style>
 
 <div on:dblclick={handleDoubleClick} role="button" tabindex={index + 2} use:popup={piecePopup} class="card bg-initial relative piece-card cursor-pointer">
-  <div 
-    data-popup={piece.id} class="card p-4 w-72 bg-gradient-to-br variant-gradient-success-warning shadow-xl z-10 popup-positioning"
-  >
-    <!-- <div class="arrow bg-surface-100-800-token" /> -->
-    <p class="h4 mb-4 font-medium">{piece.name}</p>
-    <div class="flex flex-col">
-      <button 
-        type="button" 
-        class:variant-filled-tertiary={!piece.consumed} 
-        class:variant-filled-error={piece.consumed}
-        class="btn btn-sm variant-filled mb-3"
-        on:click={() => setPieceConsumedState(piece.id, !piece.consumed)}
-        disabled={settingConsumedStateDict[piece.id]}
-      >
-        { consumedStateTextyPieceType[piece.type][+piece.consumed] } &nbsp;
-        {#if piece.consumed}
-          👈
-        {:else}
-          ✅
-        {/if}
-      </button>
-
-      <button on:click={handleEditButtonClick} type="button" class="btn variant-filled-secondary btn-sm mb-3">
-        Edit ✏️
-      </button>
-
-      {#if piece.isDeleted}
-      <button on:click={handleRestoreButtonClick} type="button" class="btn variant-filled-success btn-sm">
-        Restore ↩️
-      </button>
-      {:else}
-        <button on:click={handleDeleteButtonClick} type="button" class="btn variant-filled-error btn-sm">
-          Delete 🗑️
+  <div data-popup={piece.id} class="popup-container popup-positioning z-10">
+    <div class="card p-4 w-72 bg-gradient-to-br variant-gradient-success-warning shadow-xl mb-2">
+      <!-- <div class="arrow bg-surface-100-800-token" /> -->
+      <p class="h4 mb-4 font-medium">{piece.name}</p>
+      <div class="grid grid-cols-2 gap-2">
+        <button 
+          type="button" 
+          class:variant-filled-tertiary={!piece.consumed} 
+          class:variant-filled-error={piece.consumed}
+          class="btn btn-sm variant-filled col-span-2"
+          on:click={() => setPieceConsumedState(piece.id, !piece.consumed)}
+          disabled={settingConsumedStateDict[piece.id]}
+        >
+          <div class="flex flex-col items-center">
+            <p>
+              {#if piece.consumed}
+                👈
+              {:else}
+                ✅
+              {/if}
+            </p>
+            <p>
+              { consumedStateTextyPieceType[piece.type][+piece.consumed] } &nbsp;
+            </p>
+          </div>
         </button>
-      {/if}
+  
+        <button on:click={handleEditButtonClick} type="button" class="btn variant-filled-secondary btn-sm">
+          <div class="flex flex-col items-center">
+            <p>✏️</p>
+            <p>Edit</p>
+          </div>
+        </button>
+  
+        {#if piece.isDeleted}
+        <button on:click={handleRestoreButtonClick} type="button" class="btn variant-filled-success btn-sm">
+          <div class="flex flex-col items-center">
+            <p>↩️</p>
+            <p>Restore</p>
+          </div>
+        </button>
+        {:else}
+          <button on:click={handleDeleteButtonClick} type="button" class="btn variant-filled-error btn-sm">
+            <div class="flex flex-col items-center">
+              <p>🗑️</p>
+              <p>Delete</p>
+            </div>
+          </button>
+        {/if}
+      </div>
     </div>
+    {#if sourceOptions.suggested.length || sourceOptions.other.length}
+      <div class="card p-4 w-72 bg-gradient-to-br variant-gradient-success-warning shadow-xl">
+        <p class="text-sm mb-1">
+          Set status
+        </p>
+        {#if settingSource}
+          <div class="flex justify-center items-center">
+            <Spinner />
+          </div>
+        {:else}
+          <div class="flex items-center overflow-auto pb-2">
+            {#if sourceOptions.suggested.length}
+              {#each sourceOptions.suggested as option}
+                <div on:click={() => setSource(option)} class={`mr-2 badge ${badgeClassByPieceSource[option]}`}>
+                  {sourceTextDict[option]}
+                </div>
+              {/each}
+              {#if sourceOptions.other.length}
+                <p class="mr-2">|</p>
+              {/if}
+            {/if}
+
+            {#if sourceOptions.other.length}
+              {#each sourceOptions.other as option}
+                <div on:click={() => setSource(option)} class={`mr-2 badge ${badgeClassByPieceSource[option]}`}>
+                  {sourceTextDict[option]}
+                </div>
+              {/each}
+            {/if}
+          </div>
+        {/if}
+      </div>
+    {/if}
   </div>
   <header 
     class="relative piece-card__header"
