@@ -66,6 +66,20 @@ export const CinemarcAPI = {
           });
       });
     },
+    deleteUser: (userId: string) => {
+      return fetch("/api/delete-user", {
+        method: "POST",
+        body: JSON.stringify({ userId }),
+        headers: { ...getAuthorizationHeader() },
+      })
+      .then((res) => {
+        if (res.ok) return { success: res.ok, message: null };
+        return res.json()
+          .then(({ message }) => {
+            return { success: false, message };
+          });
+      });
+    },
   },
   pieces: {
     searchMovieInTMDB: (searchText: string, type: string) => {

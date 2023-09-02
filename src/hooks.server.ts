@@ -56,6 +56,10 @@ export const first: Handle = async  ({ event, resolve }) => {
       await checkAuthentication(event, { rank: "admin" });
       break;
     }
+    case "/api/delete-user": {
+      await checkAuthentication(event, { rank: "admin" });
+      break;
+    }
   }
   return resolve(event);
 }

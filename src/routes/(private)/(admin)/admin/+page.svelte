@@ -13,6 +13,7 @@
   })
 
   const settingBlockedDict: Record<string, boolean> = {};
+  const deletingUserDict: Record<string, boolean> = {};
 
   function toggleUserBlocked(id: string, isBlocked: boolean) {
     settingBlockedDict[id] = true;
@@ -41,8 +42,33 @@
         settingBlockedDict[id] = false;
       });
   }
+  
   function deleteUser(id: string) {
-
+    deletingUserDict[id] = true;
+    CinemarcAPI.auth.deleteUser(id)
+      .then(({ success, message }) => {
+        if (success) {
+          toastStore.trigger({
+            message: "User deleted",
+            background: 'variant-filled-success',
+          });
+        } else {
+          toastStore.trigger({
+            message: message || "An error has ocurred",
+            background: 'variant-filled-error',
+          });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        toastStore.trigger({
+            message: "An error has ocurred",
+            background: 'variant-filled-error',
+          });
+      })
+      .finally(() => {
+        deletingUserDict[id] = false;
+      });
   }
 </script>
 
@@ -90,7 +116,12 @@
                 </button>
           
                 {#if !user.isDeleted}
-                  <button on:click={() => deleteUser(user.id)} type="button" class="btn variant-filled-error btn-sm">
+                  <button 
+                    on:click={() => deleteUser(user.id)} 
+                    type="button" 
+                    class="btn variant-filled-error btn-sm"
+                    disabled={deletingUserDict[user.id]}
+                  >
                     Delete 🗑️
                   </button>
                 {/if}
