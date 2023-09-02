@@ -2,7 +2,7 @@
   import type { Piece, PieceSource, PieceType } from "../../models/piece.model";
   import { pieceTypeDict } from "../../constants/piece.const";
   import { popup, type PopupSettings } from "@skeletonlabs/skeleton";
-  import { deletePiece, updatePiece } from "../pieces/piece.fire";
+  import { deletePiece, setConsumedValue, updatePiece } from "../pieces/piece.fire";
   import { createEventDispatcher } from "svelte";
   import { minimizeDate } from "../../utils/time.utils";
 
@@ -93,7 +93,7 @@
 
   function setPieceConsumedState(pieceId: string, newState: boolean) {
     settingConsumedStateDict[pieceId] = true;
-    updatePiece(pieceId, { consumed: newState })
+    setConsumedValue(pieceId, newState)
       .then(() => dispatch("pieceConsumedToggle", { pieceId, consumed: newState }))
       .finally(() => settingConsumedStateDict[pieceId] = false);
   }

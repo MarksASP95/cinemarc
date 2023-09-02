@@ -1,5 +1,6 @@
 import type { FirestoreDocument } from "./firestore.model";
 import type { Nullable } from "./general.model";
+import type { RichTimestamp } from "./timestamp.model";
 
 export type PieceType = "movie" | "series" | "podcast" | "documentary" | "video" | "book" | "music";
 
@@ -18,6 +19,7 @@ export interface PieceCreate {
 
 export interface Piece extends PieceCreate, FirestoreDocument {
   consumed: boolean;
+  consumedAt: RichTimestamp | null;
   smallImgUrl: Nullable<string>;
 
   // TODO: deberia ponerse en el servidor con un trigger
@@ -34,7 +36,8 @@ export type PieceEditable = Partial<Pick<Piece,
   "source" | 
   "type" |
   "tmdbId" |
-  "releaseDate"
+  "releaseDate" |
+  "consumedAt"
 >>;
 
 type PieceFixedValueFilterKeys = Pick<Piece, "consumed" | "isDeleted" | "source" | "type">;

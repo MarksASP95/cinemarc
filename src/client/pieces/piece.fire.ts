@@ -39,6 +39,10 @@ export function deletePiece(id: string): Promise<any> {
   return updatePiece(id, { isDeleted: true, deletedAt: serverTimestamp() });
 }
 
+export function setConsumedValue(id: string, value: boolean): Promise<any> {
+  return updatePiece(id, { consumed: value, consumedAt: value ? serverTimestamp() : null });
+}
+
 export function updatePiece(id: string, data: PieceEditable): Promise<any> {
   const pieceDoc = doc(piecesCol, id);
   return updateDoc(pieceDoc, data);
@@ -65,7 +69,8 @@ export function createPiece(pieceCr: PieceCreate): Promise<string> {
     releaseDate: pieceCr.releaseDate,
     smallImgUrl: null, 
     ownerId,
-    tmdbId: pieceCr.tmdbId
+    tmdbId: pieceCr.tmdbId,
+    consumedAt: null,
   };
   return setDoc(pieceDoc, piece)
     .then(() => pieceDoc.id);

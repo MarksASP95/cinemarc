@@ -2,7 +2,7 @@
   import { onDestroy, onMount } from "svelte";
   import PieceCard from "../../../client/components/PieceCard.svelte";
   import Spinner from "../../../client/components/Spinner.svelte";
-  import { deletePiece, getPieces, updatePiece } from "../../../client/pieces/piece.fire";
+  import { deletePiece, getPieces, setConsumedValue, updatePiece } from "../../../client/pieces/piece.fire";
   import type { Piece } from "../../../models/piece.model";
   import { authUser$ } from "../../../auth/auth.store";
   import { get } from "svelte/store";
@@ -147,7 +147,7 @@
   }
   
   function undoConsumed(pieceId: string, newValue: boolean) {
-    updatePiece(pieceId, { consumed: newValue });
+    setConsumedValue(pieceId, newValue);
     undoConsumedFn = null;
   }
 
