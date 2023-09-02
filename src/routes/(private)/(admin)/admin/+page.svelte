@@ -65,51 +65,53 @@
       </button>
     </a>
   </div>
-  {#if !!users}
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-      {#each users as user}
-        <div use:popup={{ event: 'click', target: user.id, placement: 'top' }} class="card cursor-pointer">
-          <div 
-            data-popup={user.id} class="card p-4 w-72 bg-gradient-to-br variant-gradient-success-warning shadow-xl z-10 popup-positioning"
-          >
-          <p class="h4 mb-4 font-medium">{user.username}</p>
-            <div class="flex flex-col">
-              <button 
-                type="button" 
-                class:variant-gradient-primary-secondary={!user.isActive} 
-                class:variant-gradient-warning-error={user.isActive}
-                class="btn btn-sm bg-gradient-to-br mb-3"
-                on:click={() => toggleUserBlocked(user.id, !user.isActive)}
-                disabled={settingBlockedDict[user.id]}
-              >
-                {#if user.isActive}
-                  Block 🖕
-                {:else}
-                  Unblock 👌
-                {/if}
-              </button>
-        
-              {#if !user.isDeleted}
-                <button on:click={() => deleteUser(user.id)} type="button" class="btn variant-filled-error btn-sm">
-                  Delete 🗑️
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+      {#if !!users}
+        {#each users as user}
+          <div use:popup={{ event: 'click', target: user.id, placement: 'top' }} class="card cursor-pointer">
+            <div 
+              data-popup={user.id} class="card p-4 w-72 bg-gradient-to-br variant-gradient-success-warning shadow-xl z-10 popup-positioning"
+            >
+            <p class="h4 mb-4 font-medium">{user.username}</p>
+              <div class="flex flex-col">
+                <button 
+                  type="button" 
+                  class:variant-gradient-primary-secondary={!user.isActive} 
+                  class:variant-gradient-warning-error={user.isActive}
+                  class="btn btn-sm bg-gradient-to-br mb-3"
+                  on:click={() => toggleUserBlocked(user.id, !user.isActive)}
+                  disabled={settingBlockedDict[user.id]}
+                >
+                  {#if user.isActive}
+                    Block 🖕
+                  {:else}
+                    Unblock 👌
+                  {/if}
                 </button>
-              {/if}
+          
+                {#if !user.isDeleted}
+                  <button on:click={() => deleteUser(user.id)} type="button" class="btn variant-filled-error btn-sm">
+                    Delete 🗑️
+                  </button>
+                {/if}
+              </div>
             </div>
+            <header class="flex flex-col justify-center items-center p-4">
+              {#if !!user.avatarUrl}
+                <Avatar src={user.avatarUrl} />
+              {:else}
+                <UserInitials username={user.username} />
+              {/if}
+              <p class="text-center mt-2">
+                {user.username}
+              </p>
+            </header>
           </div>
-          <header class="flex flex-col justify-center items-center p-4">
-            {#if !!user.avatarUrl}
-              <Avatar src={user.avatarUrl} />
-            {:else}
-              <UserInitials username={user.username} />
-            {/if}
-            <p class="text-center mt-2">
-              {user.username}
-            </p>
-          </header>
-        </div>
-      {/each}
+        {/each}
+      {:else}
+        {#each [0, 0, 0, 0, 0, 0, 0, 0] as _}
+          <div class="card animate-pulse" style="height: 128px;"></div>
+        {/each}
+      {/if}
     </div>
-  {:else}
-
-  {/if}
 </div>
