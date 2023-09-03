@@ -235,7 +235,7 @@
     </div>
   {/if}
   
-  {#if !!displayedPieces?.length}
+  {#if !!pieces?.length}
     <div class="search-bar mb-8">
       <!-- svelte-ignore a11y-positive-tabindex -->
       <input 
