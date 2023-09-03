@@ -36,6 +36,9 @@
     type: string;
   } | null = null;
 
+  let formDisabled = false;
+  $: formDisabled = submittingPiece || searchingMovie;
+
   function updatePieceToDB(data: PieceEditable) {
     submittingPiece = true;
     
@@ -273,7 +276,8 @@
           };
           toastStore.trigger(t);
         }
-      });
+      })
+      .finally(() => searchingMovie = false);
   }
 
   function handleImageInputChange(e: any) {
@@ -333,7 +337,7 @@
           <div class="flex-1 mr-2">
             <input 
               on:input={handleFindableInputChange}
-              disabled={submittingPiece}
+              disabled={formDisabled}
               class:bg-gradient-to-br={fromResultMap['name']}
               class:variant-gradient-success-warning={fromResultMap['name']}
               name="name" 
@@ -344,9 +348,13 @@
               <small class="text-error-500">{formErrors.name}</small>
             {/if}
           </div>
-          <button on:click={findMovieOnTMDB} type="button" class="btn bg-gradient-to-br variant-gradient-success-warning w-32 h-fit">
+          <button disabled={formDisabled} on:click={findMovieOnTMDB} type="button" class="btn bg-gradient-to-br variant-gradient-success-warning w-32 h-fit">
             Find &nbsp;
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M4.908 2.081l-2.828 2.828 19.092 19.091 2.828-2.828-19.092-19.091zm17.678 19.091l-1.414 1.414-14.143-14.142 1.414-1.414 14.143 14.142zm-13.826-18.573c1.232.376 2.197 1.341 2.572 2.573.377-1.232 1.342-2.197 2.573-2.573-1.231-.376-2.196-1.34-2.573-2.573-.375 1.232-1.34 2.197-2.572 2.573zm-5.348 6.954c-.498 1.635-1.777 2.914-3.412 3.413 1.635.499 2.914 1.777 3.412 3.411.499-1.634 1.778-2.913 3.412-3.411-1.634-.5-2.913-1.778-3.412-3.413zm9.553-3.165c.872.266 1.553.948 1.819 1.82.266-.872.948-1.554 1.819-1.82-.871-.266-1.553-.948-1.819-1.82-.266.871-.948 1.554-1.819 1.82zm4.426-6.388c-.303.994-1.082 1.772-2.075 2.076.995.304 1.772 1.082 2.077 2.077.303-.994 1.082-1.772 2.074-2.077-.992-.303-1.772-1.082-2.076-2.076z"/></svg>
+            {#if searchingMovie}
+              <Spinner forButton />
+            {:else}
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M4.908 2.081l-2.828 2.828 19.092 19.091 2.828-2.828-19.092-19.091zm17.678 19.091l-1.414 1.414-14.143-14.142 1.414-1.414 14.143 14.142zm-13.826-18.573c1.232.376 2.197 1.341 2.572 2.573.377-1.232 1.342-2.197 2.573-2.573-1.231-.376-2.196-1.34-2.573-2.573-.375 1.232-1.34 2.197-2.572 2.573zm-5.348 6.954c-.498 1.635-1.777 2.914-3.412 3.413 1.635.499 2.914 1.777 3.412 3.411.499-1.634 1.778-2.913 3.412-3.411-1.634-.5-2.913-1.778-3.412-3.413zm9.553-3.165c.872.266 1.553.948 1.819 1.82.266-.872.948-1.554 1.819-1.82-.871-.266-1.553-.948-1.819-1.82-.266.871-.948 1.554-1.819 1.82zm4.426-6.388c-.303.994-1.082 1.772-2.075 2.076.995.304 1.772 1.082 2.077 2.077.303-.994 1.082-1.772 2.074-2.077-.992-.303-1.772-1.082-2.076-2.076z"/></svg>
+            {/if}
           </button>
         </div>
       </label>
@@ -354,7 +362,7 @@
         <span>Description (optional)</span>
         <textarea 
           on:input={handleFindableInputChange}
-          disabled={submittingPiece}
+          disabled={formDisabled}
           class="textarea" 
           class:bg-gradient-to-br={fromResultMap['description']}
           class:variant-gradient-success-warning={fromResultMap['description']}
@@ -364,7 +372,7 @@
       </label>
       <label class="label">
         <span>Type</span>
-        <select name="type" class="select" disabled={submittingPiece}>
+        <select name="type" class="select" disabled={formDisabled}>
           <option value="" selected disabled>Select a type</option>
           <option value="movie">Movie</option>
           <option value="series">Series</option>
@@ -380,7 +388,7 @@
       </label>
       <label class="label">
         <span>Source</span>
-        <select name="source" class="select" disabled={submittingPiece}>
+        <select name="source" class="select" disabled={formDisabled}>
           <option value="" selected disabled>Select a source</option>
           <option value="netflix">Netflix</option>
           <option value="youtube">Youtube</option>
@@ -400,29 +408,32 @@
         {/if}
       </label>
 
-      {#if foundImageUrl}
-        <a
-          href={foundImageUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="p-2 rounded block"
-          class:variant-filled-surface={!!!fromResultMap.image}
-          class:bg-gradient-to-br={!!fromResultMap.image}
-          class:variant-gradient-success-warning={!!fromResultMap.image}
-        >
-        {#if loadingTMDBPoster}
-          <div class="h-24 md:h-40 lg:h-48 flex justify-center items-center">
-            <Spinner />
-          </div>
-        {:else}
-          <img src={foundImageUrl} class="block w-full h-24 md:h-40 lg:h-48 object-cover rounded" alt="Found poster"/>
-        {/if}
-        </a>
-      {/if}
+      <div class:opacity-50={formDisabled}>
+        {#if foundImageUrl}
+          <a
+            on:click={(e) => formDisabled && e.preventDefault()}
+            href={foundImageUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="p-2 rounded block"
+            class:variant-filled-surface={!!!fromResultMap.image}
+            class:bg-gradient-to-br={!!fromResultMap.image}
+            class:variant-gradient-success-warning={!!fromResultMap.image}
+          >
+          {#if loadingTMDBPoster}
+            <div class="h-24 md:h-40 lg:h-48 flex justify-center items-center">
+              <Spinner />
+            </div>
+          {:else}
+            <img src={foundImageUrl} class="block w-full h-24 md:h-40 lg:h-48 object-cover rounded" alt="Found poster"/>
+          {/if}
+          </a>
+          {/if}
+      </div>
       <label class="label">
         <span>Image (optional)</span>
         <input 
-          disabled={submittingPiece}
+          disabled={formDisabled}
           accept=".png, .jpg, .jpeg"
           on:change={handleImageInputChange}
           name="image" 
@@ -434,7 +445,7 @@
         <span>Release date (optional)</span>
         <input 
           on:input={handleFindableInputChange}
-          disabled={submittingPiece}
+          disabled={formDisabled}
           accept=".png, .jpg, .jpeg"
           name="release_date" 
           class="input"  
@@ -445,14 +456,14 @@
       </label>
       {#if !!$data.tmdbId}
         <label class="flex items-center space-x-2">
-          <input name="associate_with_result" type="checkbox" class="checkbox">
+          <input disabled={formDisabled} name="associate_with_result" type="checkbox" class="checkbox">
           <p>Associate this piece with latest set result from TMDB</p>
         </label>
       {/if}
       <footer class="modal-footer {parent.regionFooter} justify-between">
           <!-- <button class="btn {parent.buttonNeutral}" on:click={parent.onClose}>{parent.buttonTextCancel}</button> -->
-          <button type="button" on:click={() => close()}>close</button>
-          <button disabled={submittingPiece} class="btn {parent.buttonPositive}" type="submit">
+          <button disabled={formDisabled} type="button" on:click={() => close()}>close</button>
+          <button disabled={formDisabled} class="btn {parent.buttonPositive}" type="submit">
             {#if submittingPiece}
               <Spinner forButton />
             {:else}
