@@ -54,7 +54,7 @@
     }
     modalStore.subscribe((modals) => {
       if (modals.length === 1) {
-        window.location.hash = modals[0].meta["id"] || 'modal';
+        window.location.hash = modals[0].meta?.["id"] || 'modal';
         addEventListener("popstate", handlePopState);
       }
       if (modals.length) {
