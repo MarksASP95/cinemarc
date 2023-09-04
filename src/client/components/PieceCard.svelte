@@ -362,6 +362,9 @@
     <h3 class="h3">
       { piece.name }
     </h3>
+    {#if piece.type === "book" && !!piece.author}
+      <small>{piece.author}</small>
+    {/if}
     {#if piece.description}
       <article>
         <p>
