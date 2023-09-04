@@ -72,6 +72,9 @@ export function createPiece(pieceCr: PieceCreate): Promise<string> {
     tmdbId: pieceCr.tmdbId,
     consumedAt: null,
   };
+
+  if (pieceCr.author) piece.author = pieceCr.author;
+  
   return setDoc(pieceDoc, piece)
     .then(() => pieceDoc.id);
 }

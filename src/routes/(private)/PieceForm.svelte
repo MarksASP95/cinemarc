@@ -2,13 +2,14 @@
 	import { Toast, modalStore, toastStore, type ToastSettings, type ModalSettings } from '@skeletonlabs/skeleton';
   import { createForm } from "felte";
   import { uploadFile } from '../../client/firebase/storage.fire';
-  import type { Piece, PieceCreate, PieceEditable } from '../../models/piece.model';
+  import type { Piece, PieceCreate, PieceEditable, PieceType } from '../../models/piece.model';
   import { createPiece, updatePiece } from '../../client/pieces/piece.fire';
   import Spinner from '../../client/components/Spinner.svelte';
   import type { TMDBMovieSearchOutput, TMDBMovieSearchOutputResult, TMDBTVSearchOutput, TMDBTVSearchOutputResult } from '../../models/tmdb.model';
   import { onMount } from 'svelte';
   import { getAuthorizationHeader } from '../../client/firebase/auth.fire';
   import { CinemarcAPI } from '../../client/cinemarc-api/cinemarc-api';
+  import { deleteField } from 'firebase/firestore';
 
   export let parent: any;
   export let success: Function;
@@ -72,6 +73,7 @@
         description, 
         source,
         type,
+        author,
         release_date = null,
         tmdbId = null,
         associate_with_result = true,
@@ -100,6 +102,12 @@
           releaseDate: release_date || null,
         };
 
+        if (type === <PieceType>"book" && (author).trim()) {
+          pieceUpdateData.author = author;
+        } else {
+          pieceUpdateData.author = deleteField() as any;
+        }
+
         updatePieceToDB(pieceUpdateData);
       } else { // create
         const pieceCr: PieceCreate = {
@@ -111,6 +119,11 @@
           releaseDate: release_date,
           tmdbId: associate_with_result ? tmdbId : null,
         };
+
+        if (type === <PieceType>"book" && (author || "").trim()) {
+          pieceCr.author = author;
+        }
+
         addPieceToDB(pieceCr)
       }
 
@@ -127,6 +140,7 @@
       setFields("description", pieceToEdit.description)
       setFields("type", pieceToEdit.type)
       setFields("source", pieceToEdit.source)
+      setFields("author", pieceToEdit.author || "")
       foundImageUrl = pieceToEdit.imageUrl;
       setFields("release_date", pieceToEdit.releaseDate)
       setFields("tmdbId", pieceToEdit.tmdbId || null);
@@ -386,6 +400,21 @@
           <small class="text-error-500">{formErrors.type}</small>
         {/if}
       </label>
+
+      {#if $data.type === 'book'}
+        <label class="label">
+          <span>Author</span>
+          <input
+            disabled={formDisabled} 
+            type="text" 
+            class="input" 
+            name="author"
+            class:bg-gradient-to-br={fromResultMap['author']}
+            class:variant-gradient-success-warning={fromResultMap['author']}
+          >
+        </label>
+      {/if}
+
       <label class="label">
         <span>Source</span>
         <select name="source" class="select" disabled={formDisabled}>

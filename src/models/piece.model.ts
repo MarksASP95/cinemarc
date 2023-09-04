@@ -15,6 +15,7 @@ export interface PieceCreate {
   imageUrl: Nullable<string>;
   releaseDate: Nullable<string>;
   tmdbId: number | null;
+  author?: string;
 }
 
 export interface Piece extends PieceCreate, FirestoreDocument {
@@ -37,7 +38,8 @@ export type PieceEditable = Partial<Pick<Piece,
   "type" |
   "tmdbId" |
   "releaseDate" |
-  "consumedAt"
+  "consumedAt" |
+  "author"
 >>;
 
 type PieceFixedValueFilterKeys = Pick<Piece, "consumed" | "isDeleted" | "source" | "type">;
