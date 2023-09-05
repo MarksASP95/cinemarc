@@ -247,6 +247,14 @@
     top: 10px !important; 
     transform: translate(-50%, 0) !important;
   }
+
+  .status-scroll {
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox */
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
 </style>
 
 <div on:dblclick={handleDoubleClick} role="button" tabindex={index + 2} use:popup={piecePopup} class="card bg-initial relative piece-card cursor-pointer">
@@ -311,7 +319,7 @@
             <Spinner />
           </div>
         {:else}
-          <div class="flex items-center overflow-auto pb-2">
+          <div class="flex items-center overflow-auto pb-2 status-scroll">
             {#if sourceOptions.suggested.length}
               {#each sourceOptions.suggested as option}
                 <div on:click={() => setSource(option)} class={`mr-2 badge ${badgeClassByPieceSource[option]}`}>
