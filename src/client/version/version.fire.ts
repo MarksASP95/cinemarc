@@ -10,6 +10,7 @@ import { modalStore } from '@skeletonlabs/skeleton';
 
 export function initVersion() {
   const versionVarDoc = doc(firestore(), "variables/version");
+  const isLocal = location.host.includes("localhost");
   valueDocSnap(versionVarDoc as DocumentReference<Var_CinemarcVersion>, (versionVar) => {
     if (!versionVar) return;
 
@@ -18,7 +19,7 @@ export function initVersion() {
       return setVersion(versionVar.value);
     }
 
-    if (localVersion.value !== versionVar.value) {
+    if (localVersion.value !== versionVar.value && !isLocal) {
       modalStore.clear();
       modalStore.trigger({
         type: 'confirm',
