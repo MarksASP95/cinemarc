@@ -10,6 +10,7 @@
   import { getAuthorizationHeader } from '../../client/firebase/auth.fire';
   import { CinemarcAPI } from '../../client/cinemarc-api/cinemarc-api';
   import { deleteField } from 'firebase/firestore';
+  import { piecePlaceholderImagesURLs } from '../../constants/piece.const';
 
   export let parent: any;
   export let success: Function;
@@ -174,7 +175,7 @@
 
     uploadImageFile
       .then((imageUrl) => {
-        pieceCr.imageUrl = imageUrl || foundImageUrl || null;
+        pieceCr.imageUrl = imageUrl || foundImageUrl || piecePlaceholderImagesURLs[pieceCr.type];
         return createPiece(pieceCr);
       })
       .then((pieceId) => {
