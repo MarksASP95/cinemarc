@@ -1,6 +1,6 @@
 {
   "name": "cinemarc",
-  "version": "1.3.2",
+  "version": "1.4.2",
   "private": true,
   "scripts": {
     "dev": "vite dev",
