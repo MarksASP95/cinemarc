@@ -23,6 +23,10 @@
   let undoDeleteFn: Function | null = null;
   let undoConsumedFn: Function | null = null;
 
+  let showGoToTopButton = false;
+  let yScroll: number;
+  $: showGoToTopButton = (!!yScroll && yScroll >= 500);
+
   function filterPiecesBySearch(_searchStr: string, pieces: Piece[] | null): Piece[] | null {
     if (!pieces) return null;
     if (!searchStr) return pieces;
@@ -125,6 +129,9 @@
     modalStore.close();
   }
 
+  function handleGoToTopButtonClick() {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
   function handlePlusButtonClick() {
     const formModalComponent: ModalComponent = {
       ref: PieceForm,
@@ -214,9 +221,18 @@
     }
   }
 
-  .add-piece-btn {
+  .add-piece-btn, .go-to-top-btn {
     svg {
       fill: currentColor;
+    }
+  }
+  .go-to-top-btn {
+    bottom: -4.5rem;
+    opacity: 0;
+    transition: all 200ms cubic-bezier(.31,.94,1,.99);
+    &.shown {
+      bottom: 1.5rem;
+      opacity: 1;
     }
   }
 </style>
@@ -273,12 +289,13 @@
   {/if}
   
   <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+
     {#if !!displayedPieces}
       {#each displayedPieces as piece, index (piece.id)}
         <PieceCard on:pieceConsumedToggle={handlePieceConsumed} on:pieceDeletedToggle={handlePieceDeleted} on:editButtonClick={openEditModal} {piece} {index} />
       {/each}
   
-      <button on:click={handlePlusButtonClick} type="button" class="add-piece-btn btn-icon btn-icon-xl variant-filled fixed bottom-6 right-6">
+      <button on:click={handlePlusButtonClick} type="button" class="add-piece-btn btn-icon btn-icon-xl bg-gradient-to-br variant-gradient-tertiary-primary fixed bottom-6 right-6">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z"/></svg>
       </button>
     {:else}
@@ -298,5 +315,10 @@
       </div>
       {/each}
     {/if}
+
+    <button class:shown={showGoToTopButton} on:click={handleGoToTopButtonClick}  type="button" class="go-to-top-btn btn-icon btn-icon-xl variant-filled fixed left-6">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="m18.787 9.473s-4.505-4.502-6.259-6.255c-.147-.146-.339-.22-.53-.22-.192 0-.384.074-.531.22-1.753 1.753-6.256 6.252-6.256 6.252-.147.147-.219.339-.217.532.001.19.075.38.221.525.292.293.766.295 1.056.004l4.977-4.976v14.692c0 .414.336.75.75.75.413 0 .75-.336.75-.75v-14.692l4.978 4.978c.289.29.762.287 1.055-.006.145-.145.219-.335.221-.525.002-.192-.07-.384-.215-.529z" fill-rule="nonzero"/></svg>
+    </button>
   </div>
 </section>
+<svelte:window bind:scrollY={yScroll} />
