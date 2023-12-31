@@ -25,10 +25,8 @@
 </style>
 
 <div
-    class="piece-filters p-2 flex items-center rounded mb-4 z-10"
+    class="piece-filters variant-filled-surface p-2 flex items-center rounded mb-4 z-10"
     class:show={show}
-    class:variant-ghost={!fixedFilters}
-    class:variant-filled-surface={fixedFilters}
     class:fixed={fixedFilters}
     class:top-1.5={fixedFilters}
 >
