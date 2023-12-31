@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Piece, PieceSource, PieceType } from "../../models/piece.model";
-  import { pieceTypeDict } from "../../constants/piece.const";
+  import { badgeClassByPieceSource, pieceSourceDict, pieceTypeDict } from "../../constants/piece.const";
   import { popup, toastStore, type PopupSettings } from "@skeletonlabs/skeleton";
   import { deletePiece, setConsumedValue, updatePiece } from "../pieces/piece.fire";
   import { createEventDispatcher } from "svelte";
@@ -61,37 +61,7 @@
   }
 
   const FALLBACK_IMAGE_URL = "https://i.blogs.es/e652ca/harold-pain-meme/840_560.jpeg";
-
-  const badgeClassByPieceSource: Record<PieceSource, string> = {
-    downloaded: "variant-filled",
-    hbo_max: "cinemarc-badge hbo_max",
-    netflix: "cinemarc-badge netflix",
-    physical: "variant-filled-secondary",
-    prime_video: "cinemarc-badge prime_video",
-    theater: "cinemarc-badge theater",
-    torrent_file: "variant-filled-warning",
-    youtube: "cinemarc-badge youtube",
-    unknown: "variant-soft-surface",
-    spotify: "cinemarc-badge spotify",
-    web: "variant-filled-tertiary",
-    mubi: "cinemarc-badge mubi",
-  };
-
-  const sourceTextDict: Record<PieceSource, string> = {
-    downloaded: "downloaded",
-    hbo_max: "hbo max",
-    netflix: "netflix",
-    physical: "physical",
-    prime_video: "prime video",
-    theater: "theaters",
-    torrent_file: "torrent file",
-    youtube: "youtube",
-    unknown: "unknown",
-    spotify: "spotify",
-    web: "web",
-    mubi: "mubi",
-  };
-
+  
   const settingConsumedStateDict: Record<string, boolean> = {};
 
   const consumedStateTextyPieceType: Record<PieceType, [string, string]> = {
@@ -210,37 +180,6 @@
       }
     }
   }
-  .cinemarc-badge {
-    &.hbo_max {
-      background: rgb(0,0,0);
-      background: linear-gradient(50deg, rgba(88,18,93,100) 21%, rgba(31,33,104,20) 71%);
-      color: #fff;
-    }
-    &.netflix {
-      background-color: #E50914;
-      color: #fff;
-    }
-    &.prime_video {
-      background-color: #00A8E1;
-      color: #fff;
-    }
-    &.theater {
-      background-color: #C13929;
-      color: #fff;
-    }
-    &.youtube {
-      background-color: #FF0000;
-      color: #fff;
-    }
-    &.spotify {
-      background-color: #1DB954;
-      color: #191414;
-    }
-    &.mubi {
-      background-color: #123485;
-      color: #fff;
-    }
-  }
 
   .popup-positioning {
     left: 50% !important; 
@@ -323,7 +262,7 @@
             {#if sourceOptions.suggested.length}
               {#each sourceOptions.suggested as option}
                 <div on:click={() => setSource(option)} class={`mr-2 badge ${badgeClassByPieceSource[option]}`}>
-                  {sourceTextDict[option]}
+                  {pieceSourceDict[option].toLowerCase()}
                 </div>
               {/each}
               {#if sourceOptions.other.length}
@@ -334,7 +273,7 @@
             {#if sourceOptions.other.length}
               {#each sourceOptions.other as option}
                 <div on:click={() => setSource(option)} class={`mr-2 badge ${badgeClassByPieceSource[option]}`}>
-                  {sourceTextDict[option]}
+                  {pieceSourceDict[option].toLowerCase()}
                 </div>
               {/each}
             {/if}
@@ -356,7 +295,7 @@
   <div class="p-4">
     <div class="flex justify-between">
       <div class={`badge ${badgeClassByPieceSource[piece.source]}`}>
-        {sourceTextDict[piece.source]}
+        {pieceSourceDict[piece.source].toLowerCase()}
       </div>
       <div 
         class="badge"

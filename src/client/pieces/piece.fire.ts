@@ -13,19 +13,19 @@ export function getPieces(onValue: ValueCallback<Piece[]>, filter: PieceFixedVal
   if (!user) throw "No current user";
 
   const usedFilter: PieceFixedValueFilter = {
-    consumed: false,
-    isDeleted: false,
+    consumptionStatus: "not-consumed",
     ...filter,
   };
   
   const constraints: QueryFieldFilterConstraint[] = [
+    where("isDeleted", "==", false),
     where("ownerId", "==", user.id),
   ];
 
-  if (usedFilter.consumed !== undefined) 
-    constraints.push(where("consumed", "==", usedFilter.consumed));
-  if (usedFilter.isDeleted !== undefined)
-    constraints.push(where("isDeleted", "==", usedFilter.isDeleted));
+  if (usedFilter.consumptionStatus === "consumed") 
+    constraints.push(where("consumed", "==", true));
+  if (usedFilter.consumptionStatus === "not-consumed") 
+    constraints.push(where("consumed", "==", false));
   if (usedFilter.source !== undefined)
     constraints.push(where("source", "==", usedFilter.source));
   if (usedFilter.type !== undefined)

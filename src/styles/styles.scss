@@ -4,3 +4,35 @@
 .confirm-modal-no-cancel .btn.variant-ghost-surface {
   display: none;
 }
+
+.cinemarc-badge {
+  &.hbo_max {
+    background: rgb(0,0,0);
+    background: linear-gradient(50deg, rgba(88,18,93,100) 21%, rgba(31,33,104,20) 71%);
+    color: #fff;
+  }
+  &.netflix {
+    background-color: #E50914;
+    color: #fff;
+  }
+  &.prime_video {
+    background-color: #00A8E1;
+    color: #fff;
+  }
+  &.theater {
+    background-color: #C13929;
+    color: #fff;
+  }
+  &.youtube {
+    background-color: #FF0000;
+    color: #fff;
+  }
+  &.spotify {
+    background-color: #1DB954;
+    color: #191414;
+  }
+  &.mubi {
+    background-color: #123485;
+    color: #fff;
+  }
+}

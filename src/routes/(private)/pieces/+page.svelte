@@ -3,7 +3,7 @@
   import PieceCard from "../../../client/components/PieceCard.svelte";
   import Spinner from "../../../client/components/Spinner.svelte";
   import { deletePiece, getPieces, setConsumedValue, updatePiece } from "../../../client/pieces/piece.fire";
-  import type { Piece } from "../../../models/piece.model";
+  import type { Piece, PieceFixedValueFilter } from "../../../models/piece.model";
   import { authUser$ } from "../../../auth/auth.store";
   import { get } from "svelte/store";
   import { modalStore, type ModalComponent, type ModalSettings, type ToastSettings, toastStore, type PopupSettings } from "@skeletonlabs/skeleton";
@@ -12,6 +12,9 @@
   import { signOut } from "../../../client/firebase/auth.fire";
   import { goto } from "$app/navigation";
   import type { Unsubscribe } from "firebase/auth";
+  import PieceFiltersForm from "../PieceFiltersForm.svelte";
+  import { badgeClassByPieceSource, consumptionStatusDict, pieceSourceDict, pieceTypeDict } from "../../../constants/piece.const";
+  import PieceFiltersBadges from "../PieceFiltersBadges.svelte";
 
   let authUser: CinemarcUser | undefined;
   let searchStr = ""
@@ -24,8 +27,26 @@
   let undoConsumedFn: Function | null = null;
 
   let showGoToTopButton = false;
+  let fixedFilters = false;
   let yScroll: number;
-  $: showGoToTopButton = (!!yScroll && yScroll >= 500);
+  $: {
+    if (!!yScroll) {
+      showGoToTopButton = yScroll >= 200;
+      fixedFilters = yScroll >= 200;
+    }
+  }
+
+  let currentFilters: PieceFixedValueFilter = {};
+  let filtersActive = false;
+  $: {
+    filtersActive = 
+      !!currentFilters.source || 
+      !!currentFilters.type ||
+      currentFilters.consumptionStatus === "all" ||
+      currentFilters.consumptionStatus === "consumed";
+  }
+
+  let showPiecesPlaceholders = false;
 
   const searchGridClasses = "search-bar mb-8 grid grid-cols-12 gap-2";
 
@@ -36,10 +57,17 @@
   }
 
   let pieces$: Unsubscribe;
-  function init() {
+  function subscribeToPieces() {
+    showPiecesPlaceholders = true;
+    clearSearch();
     pieces$ = getPieces((ps) => {
-      pieces = ps;
-    });
+      pieces = filterPiecesBySearch(searchStr, ps);
+      if (showPiecesPlaceholders) showPiecesPlaceholders = false;
+    }, currentFilters);
+  }
+
+  function init() {
+    subscribeToPieces();
   }
 
   onMount(() => {
@@ -86,7 +114,9 @@
 
   function clearSearch() {
     searchStr = "";
-    searchInputEl.value = "";
+    if (searchInputEl) {
+      searchInputEl.value = "";
+    }
   }
 
   function handleFormUpdateSuccess() {
@@ -97,6 +127,28 @@
       hideDismiss: true,
     };
     toastStore.trigger(t);
+  }
+
+  function handleFiltersFormSubmit(filters: PieceFixedValueFilter) {
+    currentFilters = filters;
+    subscribeToPieces();
+  }
+
+  function openFiltersModal(e: MouseEvent) {
+    const formModalComponent: ModalComponent = {
+      ref: PieceFiltersForm,
+      props: {
+        done: handleFiltersFormSubmit,
+        currentFilters,
+        close: onCloseModalClick,
+      },
+    }
+    const formModal: ModalSettings = {
+      type: "component",
+      component: formModalComponent,
+      meta: { id: "piece-filters" }
+    }
+    modalStore.trigger(formModal);
   }
 
   function openEditModal(e: CustomEvent<Piece>) {
@@ -269,20 +321,46 @@
         placeholder="Search in your pieces" 
       />
 
-      <button type="button" class="btn variant-filled col-span-2 md:col-span-1 p-0">
-        <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd"><path d="M23 0l-9 14.146v7.73l-3.996 2.124v-9.853l-9.004-14.147h22zm-20.249 1l8.253 12.853v8.491l1.996-1.071v-7.419l8.229-12.854h-18.478z"/></svg>
+      <button 
+        on:click={openFiltersModal} 
+        type="button" 
+        class="btn col-span-2 md:col-span-1 p-0"
+        class:bg-gradient-to-br={filtersActive}
+        class:variant-gradient-secondary-primary={filtersActive}
+        class:variant-filled={!filtersActive}
+      >
+        <svg fill={filtersActive ? "#fff" : undefined} stroke={filtersActive ? "#fff" : undefined} width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd"><path d="M23 0l-9 14.146v7.73l-3.996 2.124v-9.853l-9.004-14.147h22zm-20.249 1l8.253 12.853v8.491l1.996-1.071v-7.419l8.229-12.854h-18.478z"/></svg>
       </button>
     </div>
   {/if}
 
+  {#if filtersActive}
+    <PieceFiltersBadges show={true} currentFilters={currentFilters} fixedFilters={false} />
+    <PieceFiltersBadges show={fixedFilters} currentFilters={currentFilters} fixedFilters={true} />
+  {/if}
+
   {#if pieces?.length === 0}
     <div class="p4 mt-16">
-      <p class="text-center mt-4 mb-4" style="font-size: 4rem;">
-        🗿
-      </p>
-      <p class="text-center text-xl p-4">
-        You have no pieces. Use the button below to start!
-      </p>
+      {#if filtersActive && !showPiecesPlaceholders}
+        <p class="text-center mt-4 mb-4" style="font-size: 4rem;">
+          🫥
+        </p>
+        <p class="text-center text-xl p-4">
+          Could't find anything with those filters
+        </p>
+        <div class="flex justify-center mb-4">
+          <button on:click={openFiltersModal} type="button" class="btn w-full max-w-xs btn-sm variant-filled clear-search-button">
+            Change filters
+          </button>
+        </div>
+      {:else if !showPiecesPlaceholders}
+        <p class="text-center mt-4 mb-4" style="font-size: 4rem;">
+          🗿
+        </p>
+        <p class="text-center text-xl p-4">
+          You have no pieces. Use the button below to start!
+        </p>
+      {/if}
     </div>
   {/if}
   
@@ -297,7 +375,7 @@
   
   <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
 
-    {#if !!displayedPieces}
+    {#if !!displayedPieces && !showPiecesPlaceholders}
       {#each displayedPieces as piece, index (piece.id)}
         <PieceCard on:pieceConsumedToggle={handlePieceConsumed} on:pieceDeletedToggle={handlePieceDeleted} on:editButtonClick={openEditModal} {piece} {index} />
       {/each}
