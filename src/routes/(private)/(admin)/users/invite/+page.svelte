@@ -10,7 +10,7 @@
 
   const { form: inviteUserForm } = createForm({
     onSubmit: (values) => {
-      const requiredFields = ["email", "rank"];
+      const requiredFields = ["email"];
       const errors: Record<string, string> = {};
       formErrors = {};
       requiredFields.forEach((field) => {
