@@ -94,6 +94,8 @@
         name="usernameOrEmail" 
         class="input"  
         type="text" 
+        autocorrect="off" 
+        autocapitalize="none"
       />
       {#if formErrors.usernameOrEmail}
         <small class="text-error-500">{formErrors.usernameOrEmail}</small>

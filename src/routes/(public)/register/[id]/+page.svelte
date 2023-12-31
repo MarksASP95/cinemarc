@@ -124,6 +124,8 @@
           type="text" 
           autocomplete="off"
           maxlength={USERNAME_MAX_LENGTH}
+          autocorrect="off" 
+          autocapitalize="none"
         />
         <small class="block">Can only contain letters (at least 1), numbers and underscores</small>
         {#if formErrors.username}
