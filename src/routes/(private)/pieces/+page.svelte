@@ -27,6 +27,8 @@
   let yScroll: number;
   $: showGoToTopButton = (!!yScroll && yScroll >= 500);
 
+  const searchGridClasses = "search-bar mb-8 grid grid-cols-12 gap-2";
+
   function filterPiecesBySearch(_searchStr: string, pieces: Piece[] | null): Piece[] | null {
     if (!pieces) return null;
     if (!searchStr) return pieces;
@@ -246,13 +248,14 @@
   </div>
 
   {#if !displayedPieces} 
-    <div class="search-bar mb-8">
-      <div class="placeholder animate-pulse w-full" style="height: 42px"></div>
+    <div class={searchGridClasses}>
+      <div class="placeholder animate-pulse col-span-10 md:col-span-11" style="height: 42px"></div>
+      <div class="placeholder animate-pulse col-span-2 md:col-span-1" style="height: 42px"></div>
     </div>
   {/if}
   
   {#if !!pieces?.length}
-    <div class="search-bar mb-8">
+    <div class={searchGridClasses}>
       <!-- svelte-ignore a11y-positive-tabindex -->
       <input 
         bind:this={searchInputEl}
@@ -261,10 +264,14 @@
         autocapitalize="none"
         id="piece-search-input" 
         tabindex="1" 
-        class="input" 
+        class="input col-span-10 md:col-span-11" 
         type="text" 
         placeholder="Search in your pieces" 
       />
+
+      <button type="button" class="btn variant-filled col-span-2 md:col-span-1 p-0">
+        <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd"><path d="M23 0l-9 14.146v7.73l-3.996 2.124v-9.853l-9.004-14.147h22zm-20.249 1l8.253 12.853v8.491l1.996-1.071v-7.419l8.229-12.854h-18.478z"/></svg>
+      </button>
     </div>
   {/if}
 
