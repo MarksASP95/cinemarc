@@ -63,7 +63,6 @@
 
   let pieces$: Unsubscribe;
   function subscribeToPieces() {
-    console.log("DB");
     showPiecesPlaceholders = true;
     clearSearch();
     pieces$ = getPieces((ps) => {
@@ -148,12 +147,10 @@
     {filters, changedKeys}: { filters: PieceFixedValueFilter, changedKeys: (keyof PieceFixedValueFilter)[] }
   ) {
     currentFilters = filters;
-    console.log(changedKeys)
     const shouldQueryDB = changedKeys.some((key) => filterKeyIsForDBMap[key]);
     if (shouldQueryDB) {
       subscribeToPieces();
     } else {
-      console.log("LOCAL");
       pieces = applyYearFilters(pieces!);
     }
   }
