@@ -291,6 +291,11 @@
     <span class="badge variant-filled absolute top-4 right-4">
       { pieceTypeDict[piece.type].toLowerCase() }
     </span>
+    {#if piece.consumed}
+      <span class="absolute top-4 left-4">
+        ✅
+      </span>
+    {/if}
   </header>
   <div class="p-4">
     <div class="flex justify-between">
