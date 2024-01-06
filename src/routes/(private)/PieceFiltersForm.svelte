@@ -11,11 +11,19 @@
   export let close: Function;
   export let currentFilters: PieceFixedValueFilter;
 
-  const { form: filtersForm, data, setFields } = createForm({
+  const { form: filtersForm, data, setFields,  } = createForm({
     onSubmit: (values) => {
       done(values);
       close();
     },
+    transform: (values) => {
+      const returnable = { ...(values as Record<string, string | undefined>) } ;
+      Object.entries(returnable).forEach(([key, value]) => {
+        returnable[key] = value || undefined;
+      });
+
+      return returnable;
+    }
   });
 
   function clearFilters() {
