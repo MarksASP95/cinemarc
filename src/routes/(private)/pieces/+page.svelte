@@ -32,6 +32,13 @@
     }
   }
 
+  const filterKeyIsForDBMap: Record<(keyof PieceFixedValueFilter), boolean | undefined> = {
+    consumptionStatus: true,
+    releaseYearEnd: false,
+    releaseYearStart: false,
+    source: true,
+    type: true
+  };
   let currentFilters: PieceFixedValueFilter = {};
   let filtersActive = false;
   $: {
@@ -56,15 +63,12 @@
 
   let pieces$: Unsubscribe;
   function subscribeToPieces() {
+    console.log("DB");
     showPiecesPlaceholders = true;
     clearSearch();
     pieces$ = getPieces((ps) => {
       pieces = filterPiecesBySearch(searchStr, ps);
-      pieces = pieces!.filter((piece) => {
-        if (!piece.releaseYear) return false;
-        return piece.releaseYear >= (currentFilters.releaseYearStart || 0) && 
-               piece.releaseYear <= (currentFilters.releaseYearEnd || Infinity);
-      });
+      pieces = applyYearFilters(pieces!);
       if (showPiecesPlaceholders) showPiecesPlaceholders = false;
     }, currentFilters);
   }
@@ -132,9 +136,26 @@
     toastStore.trigger(t);
   }
 
-  function handleFiltersFormSubmit(filters: PieceFixedValueFilter) {
+  function applyYearFilters(pieces: Piece[]): Piece[] {
+    return pieces.filter((piece) => {
+        if (!piece.releaseYear) return false;
+        return piece.releaseYear >= (currentFilters.releaseYearStart || 0) && 
+               piece.releaseYear <= (currentFilters.releaseYearEnd || Infinity);
+      });
+  }
+
+  function handleFiltersFormSubmit(
+    {filters, changedKeys}: { filters: PieceFixedValueFilter, changedKeys: (keyof PieceFixedValueFilter)[] }
+  ) {
     currentFilters = filters;
-    subscribeToPieces();
+    console.log(changedKeys)
+    const shouldQueryDB = changedKeys.some((key) => filterKeyIsForDBMap[key]);
+    if (shouldQueryDB) {
+      subscribeToPieces();
+    } else {
+      console.log("LOCAL");
+      pieces = applyYearFilters(pieces!);
+    }
   }
 
   function openFiltersModal(e: MouseEvent) {

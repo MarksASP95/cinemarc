@@ -14,9 +14,17 @@
   const YEAR_MAX = new Date().getFullYear() + 5;
   const years = Array<number>(YEAR_MAX - YEAR_MIN + 1).fill(0).map((_, i) => YEAR_MAX - i);
 
-  const { form: filtersForm, setFields } = createForm({
+  const { form: filtersForm, setFields } = createForm<PieceFixedValueFilter>({
     onSubmit: (values) => {
-      done(values);
+      const changedKeys: string[] = [];
+      Object.entries(values).forEach(([key, newValue]) => {
+        if (newValue !== currentFilters[key as keyof PieceFixedValueFilter]) 
+          changedKeys.push(key);
+      });
+      done({
+        filters: values,
+        changedKeys,
+      });
       close();
     },
     transform: (values) => {
