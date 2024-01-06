@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { Toast, modalStore, toastStore, type ToastSettings, type ModalSettings } from '@skeletonlabs/skeleton';
+	import { Toast, modalStore, toastStore, type ToastSettings } from '@skeletonlabs/skeleton';
   import { createForm } from "felte";
   import { uploadFile } from '../../client/firebase/storage.fire';
   import type { Piece, PieceCreate, PieceEditable, PieceType } from '../../models/piece.model';
   import { createPiece, updatePiece } from '../../client/pieces/piece.fire';
   import Spinner from '../../client/components/Spinner.svelte';
-  import type { TMDBMovieSearchOutput, TMDBMovieSearchOutputResult, TMDBTVSearchOutput, TMDBTVSearchOutputResult } from '../../models/tmdb.model';
+  import type { TMDBMovieSearchOutputResult, TMDBTVSearchOutputResult } from '../../models/tmdb.model';
   import { onMount } from 'svelte';
-  import { getAuthorizationHeader } from '../../client/firebase/auth.fire';
   import { CinemarcAPI } from '../../client/cinemarc-api/cinemarc-api';
   import { deleteField } from 'firebase/firestore';
   import { piecePlaceholderImagesURLs } from '../../constants/piece.const';
+  import type { Nullable } from 'vitest';
 
   export let parent: any;
   export let success: Function;
@@ -93,6 +93,11 @@
       }
       formErrors = {};
 
+      const releaseYear: Nullable<number> = release_date ? 
+        parseInt((release_date as string).split("-")[0]) 
+        : 
+        null;
+
       if (!!pieceToEdit) { // edit
         const pieceUpdateData: PieceEditable = {
           description,
@@ -101,6 +106,7 @@
           type,
           tmdbId: associate_with_result ? tmdbId : null,
           releaseDate: release_date || null,
+          releaseYear,
         };
 
         if (type === <PieceType>"book" && (author).trim()) {
@@ -119,6 +125,7 @@
           type,
           releaseDate: release_date,
           tmdbId: associate_with_result ? tmdbId : null,
+          releaseYear,
         };
 
         if (type === <PieceType>"book" && (author || "").trim()) {

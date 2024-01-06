@@ -1,7 +1,7 @@
-import { addDoc, collection, CollectionReference, doc, documentId, getDoc, onSnapshot, Query, query, QueryFieldFilterConstraint, serverTimestamp, setDoc, updateDoc, where, type DocumentData } from "firebase/firestore";
-import type { ColSnapshotCallback, ValueCallback } from "../../models/general.model";
+import { collection, CollectionReference, doc, query, QueryFieldFilterConstraint, serverTimestamp, setDoc, updateDoc, where } from "firebase/firestore";
+import type { ValueCallback } from "../../models/general.model";
 import type { Piece, PieceCreate, PieceEditable, PieceFixedValueFilter } from "../../models/piece.model";
-import { generateId, subscribeTo, valueCollectionSnap } from "../firebase/docs.fire";
+import { valueCollectionSnap } from "../firebase/docs.fire";
 import { get } from 'svelte/store';
 import { authUser$ } from "../../auth/auth.store";
 import { firestore } from "../../store/firebase-firestore.store";
@@ -71,6 +71,7 @@ export function createPiece(pieceCr: PieceCreate): Promise<string> {
     ownerId,
     tmdbId: pieceCr.tmdbId,
     consumedAt: null,
+    releaseYear: pieceCr.releaseYear,
   };
 
   if (pieceCr.author) piece.author = pieceCr.author;

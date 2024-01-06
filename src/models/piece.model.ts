@@ -14,6 +14,7 @@ export interface PieceCreate {
   source: PieceSource;
   imageUrl: Nullable<string>;
   releaseDate: Nullable<string>;
+  releaseYear: Nullable<number>;
   tmdbId: number | null;
   author?: string;
 }
@@ -39,7 +40,8 @@ export type PieceEditable = Partial<Pick<Piece,
   "tmdbId" |
   "releaseDate" |
   "consumedAt" |
-  "author"
+  "author" |
+  "releaseYear"
 >>;
 
 export type PieceFilterConsumptionStatus = "consumed" | "not-consumed" | "all";
@@ -47,4 +49,6 @@ export type PieceFixedValueFilter = {
   consumptionStatus?: PieceFilterConsumptionStatus;
   source?: PieceSource;
   type?: PieceType;
+  releaseYearStart?: number;
+  releaseYearEnd?: number;
 }

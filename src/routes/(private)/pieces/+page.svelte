@@ -1,19 +1,15 @@
 <script lang="ts">
-  import { onDestroy, onMount } from "svelte";
+  import { onMount } from "svelte";
   import PieceCard from "../../../client/components/PieceCard.svelte";
-  import Spinner from "../../../client/components/Spinner.svelte";
-  import { deletePiece, getPieces, setConsumedValue, updatePiece } from "../../../client/pieces/piece.fire";
+  import { getPieces, setConsumedValue, updatePiece } from "../../../client/pieces/piece.fire";
   import type { Piece, PieceFixedValueFilter } from "../../../models/piece.model";
   import { authUser$ } from "../../../auth/auth.store";
-  import { get } from "svelte/store";
-  import { modalStore, type ModalComponent, type ModalSettings, type ToastSettings, toastStore, type PopupSettings } from "@skeletonlabs/skeleton";
+  import { modalStore, type ModalComponent, type ModalSettings, type ToastSettings, toastStore } from "@skeletonlabs/skeleton";
   import PieceForm from "../PieceForm.svelte";
   import type { CinemarcUser } from "../../../models/user.model";
-  import { signOut } from "../../../client/firebase/auth.fire";
   import { goto } from "$app/navigation";
   import type { Unsubscribe } from "firebase/auth";
   import PieceFiltersForm from "../PieceFiltersForm.svelte";
-  import { badgeClassByPieceSource, consumptionStatusDict, pieceSourceDict, pieceTypeDict } from "../../../constants/piece.const";
   import PieceFiltersBadges from "../PieceFiltersBadges.svelte";
 
   let authUser: CinemarcUser | undefined;
@@ -43,7 +39,9 @@
       !!currentFilters.source || 
       !!currentFilters.type ||
       currentFilters.consumptionStatus === "all" ||
-      currentFilters.consumptionStatus === "consumed";
+      currentFilters.consumptionStatus === "consumed" ||
+      !!currentFilters.releaseYearStart ||
+      !!currentFilters.releaseYearEnd;
   }
 
   let showPiecesPlaceholders = false;
@@ -62,6 +60,11 @@
     clearSearch();
     pieces$ = getPieces((ps) => {
       pieces = filterPiecesBySearch(searchStr, ps);
+      pieces = pieces!.filter((piece) => {
+        if (!piece.releaseYear) return false;
+        return piece.releaseYear >= (currentFilters.releaseYearStart || 0) && 
+               piece.releaseYear <= (currentFilters.releaseYearEnd || Infinity);
+      });
       if (showPiecesPlaceholders) showPiecesPlaceholders = false;
     }, currentFilters);
   }

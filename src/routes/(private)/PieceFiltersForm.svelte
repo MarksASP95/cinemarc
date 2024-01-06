@@ -2,7 +2,6 @@
   import { Toast, modalStore } from '@skeletonlabs/skeleton';
   import { createForm } from "felte";
   import type { PieceFilterConsumptionStatus, PieceFixedValueFilter } from '../../models/piece.model';
-  import Spinner from '../../client/components/Spinner.svelte';
   import { onMount } from 'svelte';
   import { pieceSourceDict, pieceSources, pieceTypeDict, pieceTypes } from '../../constants/piece.const';
 
@@ -11,18 +10,26 @@
   export let close: Function;
   export let currentFilters: PieceFixedValueFilter;
 
-  const { form: filtersForm, data, setFields,  } = createForm({
+  const YEAR_MIN = 1900;
+  const YEAR_MAX = new Date().getFullYear() + 5;
+  const years = Array<number>(YEAR_MAX - YEAR_MIN + 1).fill(0).map((_, i) => YEAR_MAX - i);
+
+  const { form: filtersForm, setFields } = createForm({
     onSubmit: (values) => {
       done(values);
       close();
     },
     transform: (values) => {
-      const returnable = { ...(values as Record<string, string | undefined>) } ;
+      const returnable = { ...(values as Record<string, string | number | undefined>) } ;
       Object.entries(returnable).forEach(([key, value]) => {
+        if (key === "releaseYearEnd" || key === "releaseYearStart") {
+          returnable[key] = value ? parseInt(value as string) : undefined;
+          return;
+        }
         returnable[key] = value || undefined;
       });
 
-      return returnable;
+      return returnable
     }
   });
 
@@ -30,12 +37,16 @@
     setFields("consumptionStatus", <PieceFilterConsumptionStatus>"not-consumed");
     setFields("type", undefined);
     setFields("source", undefined);
+    setFields("releaseYearStart", undefined);
+    setFields("releaseYearEnd", undefined);
   }
 
   onMount(() => {
     setFields("consumptionStatus", currentFilters.consumptionStatus || <PieceFilterConsumptionStatus>"not-consumed");
     setFields("type", currentFilters.type);
     setFields("source", currentFilters.source);
+    setFields("releaseYearStart", currentFilters.releaseYearStart);
+    setFields("releaseYearEnd", currentFilters.releaseYearEnd);
   });
 
 	const cBase = 'card p-4 w-modal shadow-xl space-y-4 overflow-auto';
@@ -83,6 +94,29 @@
             <option value={source}>{pieceSourceDict[source]}</option>
           {/each}
         </select>
+      </label>
+
+      <label class="label">
+        <span>Release year</span>
+        <div class="flex content-center">
+          <select name="releaseYearStart" class="select mr-2">
+            <option value="">Any</option>
+            {#each years as year}
+              <option value={year}>
+                {year}
+              </option>
+            {/each}
+          </select>
+
+          <select name="releaseYearEnd" class="select mr-2">
+            <option value="">Any</option>
+            {#each years as year}
+              <option value={year}>
+                {year}
+              </option>
+            {/each}
+          </select>
+        </div>
       </label>
 
       <footer class="modal-footer {parent.regionFooter} justify-between">

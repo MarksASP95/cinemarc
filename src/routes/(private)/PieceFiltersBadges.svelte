@@ -55,5 +55,16 @@
             </span>
             </div>
         {/if}
+
+        {#if currentFilters.releaseYearStart || currentFilters.releaseYearEnd}
+            <div class="flex me-2">
+                <span class="badge variant-filled rounded-r-none">year</span>
+                <span class="badge rounded-l-none variant-filled">
+                    {currentFilters.releaseYearStart || "?"}
+                    -
+                    {currentFilters.releaseYearEnd || "?"}
+                </span>
+            </div>
+        {/if}
     </div>
 </div>
