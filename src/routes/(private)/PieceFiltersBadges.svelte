@@ -41,7 +41,7 @@
         {/if}
         {#if currentFilters.type}
             <div class="flex me-2">
-            <span class="badge variant-soft-primary rounded-r-none">type</span>
+            <span class="badge variant-filled rounded-r-none">type</span>
             <span class="badge rounded-l-none variant-filled">
                 {pieceTypeDict[currentFilters.type].toLowerCase()}
             </span>
@@ -49,7 +49,7 @@
         {/if}
         {#if !!currentFilters.consumptionStatus && currentFilters.consumptionStatus !== "not-consumed"}
             <div class="flex me-2">
-            <span class="badge variant-soft-primary rounded-r-none">consumption</span>
+            <span class="badge variant-filled rounded-r-none">consumption</span>
             <span class="badge rounded-l-none variant-filled">
                 {consumptionStatusDict[currentFilters.consumptionStatus].toLowerCase()}
             </span>
