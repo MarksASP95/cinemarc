@@ -91,8 +91,7 @@
     showPiecesPlaceholders = true;
     clearSearch();
     pieces$ = getPieces((ps) => {
-      pieces = filterPiecesBySearch(searchStr, ps);
-      pieces = applyYearFilters(pieces!);
+      pieces = ps;
       if (showPiecesPlaceholders) showPiecesPlaceholders = false;
     }, currentFilters);
   }
