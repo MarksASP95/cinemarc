@@ -1,14 +1,56 @@
-import { collection, CollectionReference, doc, query, QueryFieldFilterConstraint, serverTimestamp, setDoc, updateDoc, where } from "firebase/firestore";
+import {
+  collection,
+  CollectionReference,
+  doc,
+  query,
+  QueryFieldFilterConstraint,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import type { ValueCallback } from "../../models/general.model";
-import type { Piece, PieceCreate, PieceEditable, PieceFixedValueFilter } from "../../models/piece.model";
+import type {
+  Piece,
+  PieceCreate,
+  PieceEditable,
+  PieceFixedValueFilter,
+} from "../../models/piece.model";
 import { valueCollectionSnap } from "../firebase/docs.fire";
-import { get } from 'svelte/store';
+import { get } from "svelte/store";
 import { authUser$ } from "../../auth/auth.store";
 import { firestore } from "../../store/firebase-firestore.store";
+import { type TagDocument } from "../../models/tag.model";
 
-const piecesCol = collection(firestore(), "pieces") as CollectionReference<Piece>;
+function getTagsCol(userId: string) {
+  console.log("path", `users.${userId}.tags`);
+  return collection(
+    firestore(),
+    `users/${userId}/tags`
+  ) as CollectionReference<TagDocument>;
+}
 
-export function getPieces(onValue: ValueCallback<Piece[]>, filter: PieceFixedValueFilter = {}) {
+const piecesCol = collection(
+  firestore(),
+  "pieces"
+) as CollectionReference<Piece>;
+
+export function getTags(onValue: ValueCallback<TagDocument[]>) {
+  const user = get(authUser$);
+  if (!user) throw "No current user";
+
+  const constraints: QueryFieldFilterConstraint[] = [
+    where("isDeleted", "==", false),
+  ];
+
+  const q = query(getTagsCol(user.id), ...constraints);
+  return valueCollectionSnap(q, onValue);
+}
+
+export function getPieces(
+  onValue: ValueCallback<Piece[]>,
+  filter: PieceFixedValueFilter = {}
+) {
   const user = get(authUser$);
   if (!user) throw "No current user";
 
@@ -16,15 +58,15 @@ export function getPieces(onValue: ValueCallback<Piece[]>, filter: PieceFixedVal
     consumptionStatus: "not-consumed",
     ...filter,
   };
-  
+
   const constraints: QueryFieldFilterConstraint[] = [
     where("isDeleted", "==", false),
     where("ownerId", "==", user.id),
   ];
 
-  if (usedFilter.consumptionStatus === "consumed") 
+  if (usedFilter.consumptionStatus === "consumed")
     constraints.push(where("consumed", "==", true));
-  if (usedFilter.consumptionStatus === "not-consumed") 
+  if (usedFilter.consumptionStatus === "not-consumed")
     constraints.push(where("consumed", "==", false));
   if (usedFilter.source !== undefined)
     constraints.push(where("source", "==", usedFilter.source));
@@ -40,7 +82,10 @@ export function deletePiece(id: string): Promise<any> {
 }
 
 export function setConsumedValue(id: string, value: boolean): Promise<any> {
-  return updatePiece(id, { consumed: value, consumedAt: value ? serverTimestamp() : null });
+  return updatePiece(id, {
+    consumed: value,
+    consumedAt: value ? serverTimestamp() : null,
+  });
 }
 
 export function updatePiece(id: string, data: PieceEditable): Promise<any> {
@@ -67,15 +112,15 @@ export function createPiece(pieceCr: PieceCreate): Promise<string> {
     source: pieceCr.source,
     type: pieceCr.type,
     releaseDate: pieceCr.releaseDate,
-    smallImgUrl: null, 
+    smallImgUrl: null,
     ownerId,
     tmdbId: pieceCr.tmdbId,
     consumedAt: null,
     releaseYear: pieceCr.releaseYear,
+    tagsIds: pieceCr.tagsIds,
   };
 
   if (pieceCr.author) piece.author = pieceCr.author;
-  
-  return setDoc(pieceDoc, piece)
-    .then(() => pieceDoc.id);
+
+  return setDoc(pieceDoc, piece).then(() => pieceDoc.id);
 }

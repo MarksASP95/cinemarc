@@ -1,21 +1,40 @@
 <script lang="ts">
-	import { Toast, modalStore, toastStore, type ToastSettings } from '@skeletonlabs/skeleton';
-  import { createForm } from "felte";
-  import { uploadFile } from '../../client/firebase/storage.fire';
-  import type { Piece, PieceCreate, PieceEditable, PieceType } from '../../models/piece.model';
-  import { createPiece, updatePiece } from '../../client/pieces/piece.fire';
-  import Spinner from '../../client/components/Spinner.svelte';
-  import type { TMDBMovieSearchOutputResult, TMDBTVSearchOutputResult } from '../../models/tmdb.model';
-  import { onMount } from 'svelte';
-  import { CinemarcAPI } from '../../client/cinemarc-api/cinemarc-api';
-  import { deleteField } from 'firebase/firestore';
-  import { piecePlaceholderImagesURLs } from '../../constants/piece.const';
-  import type { Nullable } from 'vitest';
+  import {
+    Toast,
+    modalStore,
+    toastStore,
+    type ToastSettings,
+  } from "@skeletonlabs/skeleton";
+  import { createForm, getValue } from "felte";
+  import { deleteField } from "firebase/firestore";
+  import { onMount } from "svelte";
+  import type { Nullable } from "vitest";
+  import { CinemarcAPI } from "../../client/cinemarc-api/cinemarc-api";
+  import Spinner from "../../client/components/Spinner.svelte";
+  import { uploadFile } from "../../client/firebase/storage.fire";
+  import { createPiece, updatePiece } from "../../client/pieces/piece.fire";
+  import { piecePlaceholderImagesURLs } from "../../constants/piece.const";
+  import type {
+    Piece,
+    PieceCreate,
+    PieceEditable,
+    PieceType,
+  } from "../../models/piece.model";
+  import type {
+    TMDBMovieSearchOutputResult,
+    TMDBTVSearchOutputResult,
+  } from "../../models/tmdb.model";
+  import { type TagDocument } from "../../models/tag.model";
+  import { buildRecord } from "../../utils/object.util";
 
   export let parent: any;
   export let success: Function;
   export let close: Function;
   export let pieceToEdit: Piece | undefined = undefined;
+  export let tags: TagDocument[];
+
+  let tagsMap: Record<string, TagDocument> = buildRecord(tags, "id");
+  let selectedTagsMap: Record<string, boolean> = {};
 
   let formErrors: Record<string, string> = {};
   let submittingPiece = false;
@@ -30,6 +49,8 @@
     tmdbId: false,
   };
 
+  $: tagsIdsValue = ($data.tagsIds as string[]) || [];
+
   let loadingTMDBPoster = false;
   let foundPieceConfig: {
     results: (TMDBMovieSearchOutputResult | TMDBTVSearchOutputResult)[];
@@ -43,7 +64,7 @@
 
   function updatePieceToDB(data: PieceEditable) {
     submittingPiece = true;
-    
+
     let uploadImageFile: Promise<string | null> = Promise.resolve(null);
     if (imageFile) {
       uploadImageFile = uploadMovieImage(imageFile);
@@ -56,7 +77,12 @@
       })
       .then((pieceId) => {
         if (data.imageUrl !== pieceToEdit?.imageUrl) {
-          data.imageUrl && CinemarcAPI.pieces.uploadPosterThumbnail(data.imageUrl, data.name!, pieceId);
+          data.imageUrl &&
+            CinemarcAPI.pieces.uploadPosterThumbnail(
+              data.imageUrl,
+              data.name!,
+              pieceId
+            );
         }
         success();
       })
@@ -64,41 +90,47 @@
         console.log("Error updating piece", err);
         handleFormError();
       })
-      .finally(() => submittingPiece = false);
+      .finally(() => (submittingPiece = false));
   }
 
-  const { form: pieceForm, data, setFields } = createForm({
+  const {
+    form: pieceForm,
+    data,
+    setFields,
+    addField,
+  } = createForm({
     onSubmit: (values) => {
       const {
         name,
-        description, 
+        description,
         source,
         type,
         author,
         release_date = null,
         tmdbId = null,
         associate_with_result = true,
+        tagsIds = [],
       } = values;
-    
+
       const requiredFields = ["name", "source", "type"];
-  
+
       const errors: Record<string, string> = {};
       requiredFields.forEach((field) => {
         if (!values[field]) errors[field] = "This field is required";
       });
-  
+
       if (Object.keys(errors).length) {
         formErrors = errors;
         return;
       }
       formErrors = {};
 
-      const releaseYear: Nullable<number> = release_date ? 
-        parseInt((release_date as string).split("-")[0]) 
-        : 
-        null;
+      const releaseYear: Nullable<number> = release_date
+        ? parseInt((release_date as string).split("-")[0])
+        : null;
 
-      if (!!pieceToEdit) { // edit
+      if (!!pieceToEdit) {
+        // edit
         const pieceUpdateData: PieceEditable = {
           description,
           name,
@@ -107,16 +139,18 @@
           tmdbId: associate_with_result ? tmdbId : null,
           releaseDate: release_date || null,
           releaseYear,
+          tagsIds,
         };
 
-        if (type === <PieceType>"book" && (author).trim()) {
+        if (type === <PieceType>"book" && author.trim()) {
           pieceUpdateData.author = author;
         } else {
           pieceUpdateData.author = deleteField() as any;
         }
 
         updatePieceToDB(pieceUpdateData);
-      } else { // create
+      } else {
+        // create
         const pieceCr: PieceCreate = {
           description: description || null,
           imageUrl: null,
@@ -126,33 +160,33 @@
           releaseDate: release_date,
           tmdbId: associate_with_result ? tmdbId : null,
           releaseYear,
+          tagsIds,
         };
 
         if (type === <PieceType>"book" && (author || "").trim()) {
           pieceCr.author = author;
         }
 
-        addPieceToDB(pieceCr)
+        addPieceToDB(pieceCr);
       }
-
-
     },
     onError: (e) => {
-      console.log("Error was", e)
-    }
+      console.log("Error was", e);
+    },
   });
 
   onMount(() => {
     if (!!pieceToEdit) {
-      setFields("name", pieceToEdit.name)
-      setFields("description", pieceToEdit.description)
-      setFields("type", pieceToEdit.type)
-      setFields("source", pieceToEdit.source)
-      setFields("author", pieceToEdit.author || "")
+      setFields("name", pieceToEdit.name);
+      setFields("description", pieceToEdit.description);
+      setFields("type", pieceToEdit.type);
+      setFields("source", pieceToEdit.source);
+      setFields("author", pieceToEdit.author || "");
       foundImageUrl = pieceToEdit.imageUrl;
-      setFields("release_date", pieceToEdit.releaseDate)
+      setFields("release_date", pieceToEdit.releaseDate);
       setFields("tmdbId", pieceToEdit.tmdbId || null);
       setFields("associate_with_result", !!pieceToEdit.tmdbId);
+      setFields("tagsIds", !!pieceToEdit.tagsIds);
     } else {
       setFields("associate_with_result", true);
     }
@@ -160,8 +194,8 @@
 
   function handleFormError() {
     const t: ToastSettings = {
-      message: 'Something went wrong 😕',
-      background: 'variant-filled-error',
+      message: "Something went wrong 😕",
+      background: "variant-filled-error",
       hideDismiss: true,
     };
     toastStore.trigger(t);
@@ -182,26 +216,33 @@
 
     uploadImageFile
       .then((imageUrl) => {
-        pieceCr.imageUrl = imageUrl || foundImageUrl || piecePlaceholderImagesURLs[pieceCr.type];
+        pieceCr.imageUrl =
+          imageUrl || foundImageUrl || piecePlaceholderImagesURLs[pieceCr.type];
         return createPiece(pieceCr);
       })
       .then((pieceId) => {
-        pieceCr.imageUrl && CinemarcAPI.pieces.uploadPosterThumbnail(pieceCr.imageUrl, pieceCr.name, pieceId);
+        pieceCr.imageUrl &&
+          CinemarcAPI.pieces.uploadPosterThumbnail(
+            pieceCr.imageUrl,
+            pieceCr.name,
+            pieceId
+          );
         success();
       })
       .catch((err) => {
         console.log("Error creating piece", err);
         handleFormError();
       })
-      .finally(() => submittingPiece = false);
+      .finally(() => (submittingPiece = false));
   }
 
   function goToNextResult() {
     if (!foundPieceConfig) return;
-    foundPieceConfig.currentResultIndex 
-      = (foundPieceConfig.currentResultIndex + 1) % foundPieceConfig.results.length;
+    foundPieceConfig.currentResultIndex =
+      (foundPieceConfig.currentResultIndex + 1) %
+      foundPieceConfig.results.length;
     setPieceFormToResult(
-      foundPieceConfig.type, 
+      foundPieceConfig.type,
       foundPieceConfig.results[foundPieceConfig.currentResultIndex]
     );
   }
@@ -209,36 +250,36 @@
   function goToPreviousResult() {
     if (!foundPieceConfig) return;
     const newIndex = foundPieceConfig.currentResultIndex - 1;
-    foundPieceConfig.currentResultIndex 
-      = newIndex < 0 ? foundPieceConfig.results.length - 1 : newIndex;
+    foundPieceConfig.currentResultIndex =
+      newIndex < 0 ? foundPieceConfig.results.length - 1 : newIndex;
     setPieceFormToResult(
-      foundPieceConfig.type, 
+      foundPieceConfig.type,
       foundPieceConfig.results[foundPieceConfig.currentResultIndex]
     );
   }
 
   function setPieceFormToResult(
-    type: string, 
+    type: string,
     result: TMDBMovieSearchOutputResult | TMDBTVSearchOutputResult
   ) {
     setFields(
-      "name", 
-      type === "movie" ? 
-        (result as TMDBMovieSearchOutputResult).original_title 
-        :
-        (result as TMDBTVSearchOutputResult).name,
+      "name",
+      type === "movie"
+        ? (result as TMDBMovieSearchOutputResult).original_title
+        : (result as TMDBTVSearchOutputResult).name,
       true
     );
     setFields("description", result.overview, true);
     setFields("type", $data.type || "movie", true);
     setFields("tmdbId", result.id);
     setFields("associate_with_result", true);
+    setFields("tags", []);
 
-    const releaseDateStr = 
+    const releaseDateStr =
       (result as TMDBMovieSearchOutputResult).release_date ||
-      (result as TMDBTVSearchOutputResult).first_air_date || 
+      (result as TMDBTVSearchOutputResult).first_air_date ||
       null;
-    
+
     setFields("release_date", releaseDateStr);
 
     foundImageUrl = `https://image.tmdb.org/t/p/original${result.poster_path}`;
@@ -249,7 +290,7 @@
     loadingTMDBPoster = true;
 
     img.onload = () => {
-        loadingTMDBPoster = false
+      loadingTMDBPoster = false;
     };
 
     fromResultMap = {
@@ -260,23 +301,25 @@
       tmdbId: true,
     };
   }
-  
+
   function findMovieOnTMDB() {
     searchingMovie = true;
     const searchText = $data.name;
 
     let type: string;
-    switch($data.type) {
+    switch ($data.type) {
       case "movie":
         type = "movie";
         break;
       case "series":
         type = "tv";
         break;
-      default: type = "movie";
+      default:
+        type = "movie";
     }
 
-    CinemarcAPI.pieces.searchMovieInTMDB(searchText, type)
+    CinemarcAPI.pieces
+      .searchMovieInTMDB(searchText, type)
       .then((data) => {
         if (data.results.length) {
           foundPieceConfig = {
@@ -284,22 +327,22 @@
             currentResultIndex: 0,
             results: data.results,
             searchText,
-          }
+          };
           setPieceFormToResult(
-            foundPieceConfig.type, 
+            foundPieceConfig.type,
             data.results[foundPieceConfig.currentResultIndex]
           );
         } else {
           foundPieceConfig = null;
           const t: ToastSettings = {
-            message: 'Couldn\'t find anything 👉👈',
-            background: 'variant-filled-warning',
+            message: "Couldn't find anything 👉👈",
+            background: "variant-filled-warning",
             hideDismiss: true,
           };
           toastStore.trigger(t);
         }
       })
-      .finally(() => searchingMovie = false);
+      .finally(() => (searchingMovie = false));
   }
 
   function handleImageInputChange(e: any) {
@@ -308,9 +351,15 @@
     fromResultMap.image = false;
   }
 
-	const cBase = 'card p-4 w-modal shadow-xl space-y-4 overflow-auto';
-	const cHeader = 'text-2xl font-bold flex justify-between';
-	const cForm = 'border border-surface-500 p-4 space-y-4 rounded-container-token';
+  function addTag(tagId: string) {
+    addField(`tagsIds.${tagsIdsValue.length}`, tagId);
+    console.log(getValue($data, "tagsIds"));
+  }
+
+  const cBase = "card p-4 w-modal shadow-xl space-y-4 overflow-auto";
+  const cHeader = "text-2xl font-bold flex justify-between";
+  const cForm =
+    "border border-surface-500 p-4 space-y-4 rounded-container-token";
 
   function handleFindableInputChange(e: any) {
     const { name } = e.target;
@@ -321,33 +370,42 @@
 
 <Toast />
 {#if $modalStore[0]}
-	<div style="max-height: 94dvh" class="{cBase}">
+  <div style="max-height: 94dvh" class={cBase}>
     <header class={cHeader}>
       <span>
         {#if !pieceToEdit}
           New Piece yay!
         {:else}
-          Edit "{ pieceToEdit.name }"
+          Edit "{pieceToEdit.name}"
         {/if}
       </span>
 
-      <button class="text-base" on:click={() => close()}>
-        ❌
-      </button>
+      <button class="text-base" on:click={() => close()}> ❌ </button>
     </header>
 
     {#if !!foundPieceConfig}
       <p class="text-center mb-1">
-        Found { foundPieceConfig.results.length } results for "{foundPieceConfig.searchText}"
+        Found {foundPieceConfig.results.length} results for "{foundPieceConfig.searchText}"
       </p>
       <div class="flex justify-center items-center">
-        <button on:click={goToPreviousResult} type="button" class="btn-icon btn-icon-sm variant-filled bg-gradient-to-br variant-gradient-secondary-tertiary">👈</button>
+        <button
+          on:click={goToPreviousResult}
+          type="button"
+          class="btn-icon btn-icon-sm variant-filled bg-gradient-to-br variant-gradient-secondary-tertiary"
+          >👈</button
+        >
         <p class="font-mono text-sm mx-2">
-          {foundPieceConfig.currentResultIndex + 1}/{foundPieceConfig.results.length}
+          {foundPieceConfig.currentResultIndex + 1}/{foundPieceConfig.results
+            .length}
         </p>
-        <button on:click={goToNextResult} type="button" class="btn-icon btn-icon-sm variant-filled bg-gradient-to-br variant-gradient-secondary-tertiary">👉</button>
+        <button
+          on:click={goToNextResult}
+          type="button"
+          class="btn-icon btn-icon-sm variant-filled bg-gradient-to-br variant-gradient-secondary-tertiary"
+          >👉</button
+        >
       </div>
-      {/if}
+    {/if}
     <form use:pieceForm class="modal-form {cForm}">
       <!-- svelte-ignore a11y-autofocus -->
       {#if !!pieceToEdit}
@@ -357,39 +415,53 @@
         <span>Name</span>
         <div class="flex">
           <div class="flex-1 mr-2">
-            <input 
+            <input
               on:input={handleFindableInputChange}
               disabled={formDisabled}
-              class:bg-gradient-to-br={fromResultMap['name']}
-              class:variant-gradient-success-warning={fromResultMap['name']}
-              name="name" 
-              class="input"  
-              type="text" 
+              class:bg-gradient-to-br={fromResultMap["name"]}
+              class:variant-gradient-success-warning={fromResultMap["name"]}
+              name="name"
+              class="input"
+              type="text"
             />
             {#if formErrors.name}
               <small class="text-error-500">{formErrors.name}</small>
             {/if}
           </div>
-          <button disabled={formDisabled} on:click={findMovieOnTMDB} type="button" class="btn bg-gradient-to-br variant-gradient-success-warning w-32 h-fit">
+          <button
+            disabled={formDisabled}
+            on:click={findMovieOnTMDB}
+            type="button"
+            class="btn bg-gradient-to-br variant-gradient-success-warning w-32 h-fit"
+          >
             Find &nbsp;
             {#if searchingMovie}
               <Spinner forButton />
             {:else}
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M4.908 2.081l-2.828 2.828 19.092 19.091 2.828-2.828-19.092-19.091zm17.678 19.091l-1.414 1.414-14.143-14.142 1.414-1.414 14.143 14.142zm-13.826-18.573c1.232.376 2.197 1.341 2.572 2.573.377-1.232 1.342-2.197 2.573-2.573-1.231-.376-2.196-1.34-2.573-2.573-.375 1.232-1.34 2.197-2.572 2.573zm-5.348 6.954c-.498 1.635-1.777 2.914-3.412 3.413 1.635.499 2.914 1.777 3.412 3.411.499-1.634 1.778-2.913 3.412-3.411-1.634-.5-2.913-1.778-3.412-3.413zm9.553-3.165c.872.266 1.553.948 1.819 1.82.266-.872.948-1.554 1.819-1.82-.871-.266-1.553-.948-1.819-1.82-.266.871-.948 1.554-1.819 1.82zm4.426-6.388c-.303.994-1.082 1.772-2.075 2.076.995.304 1.772 1.082 2.077 2.077.303-.994 1.082-1.772 2.074-2.077-.992-.303-1.772-1.082-2.076-2.076z"/></svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                ><path
+                  d="M4.908 2.081l-2.828 2.828 19.092 19.091 2.828-2.828-19.092-19.091zm17.678 19.091l-1.414 1.414-14.143-14.142 1.414-1.414 14.143 14.142zm-13.826-18.573c1.232.376 2.197 1.341 2.572 2.573.377-1.232 1.342-2.197 2.573-2.573-1.231-.376-2.196-1.34-2.573-2.573-.375 1.232-1.34 2.197-2.572 2.573zm-5.348 6.954c-.498 1.635-1.777 2.914-3.412 3.413 1.635.499 2.914 1.777 3.412 3.411.499-1.634 1.778-2.913 3.412-3.411-1.634-.5-2.913-1.778-3.412-3.413zm9.553-3.165c.872.266 1.553.948 1.819 1.82.266-.872.948-1.554 1.819-1.82-.871-.266-1.553-.948-1.819-1.82-.266.871-.948 1.554-1.819 1.82zm4.426-6.388c-.303.994-1.082 1.772-2.075 2.076.995.304 1.772 1.082 2.077 2.077.303-.994 1.082-1.772 2.074-2.077-.992-.303-1.772-1.082-2.076-2.076z"
+                /></svg
+              >
             {/if}
           </button>
         </div>
       </label>
       <label class="label">
         <span>Description (optional)</span>
-        <textarea 
+        <textarea
           on:input={handleFindableInputChange}
           disabled={formDisabled}
-          class="textarea" 
-          class:bg-gradient-to-br={fromResultMap['description']}
-          class:variant-gradient-success-warning={fromResultMap['description']}
-          name="description" 
-          id="" rows="3"
+          class="textarea"
+          class:bg-gradient-to-br={fromResultMap["description"]}
+          class:variant-gradient-success-warning={fromResultMap["description"]}
+          name="description"
+          id=""
+          rows="3"
         ></textarea>
       </label>
       <label class="label">
@@ -409,17 +481,17 @@
         {/if}
       </label>
 
-      {#if $data.type === 'book'}
+      {#if $data.type === "book"}
         <label class="label">
           <span>Author</span>
           <input
-            disabled={formDisabled} 
-            type="text" 
-            class="input" 
+            disabled={formDisabled}
+            type="text"
+            class="input"
             name="author"
-            class:bg-gradient-to-br={fromResultMap['author']}
-            class:variant-gradient-success-warning={fromResultMap['author']}
-          >
+            class:bg-gradient-to-br={fromResultMap["author"]}
+            class:variant-gradient-success-warning={fromResultMap["author"]}
+          />
         </label>
       {/if}
 
@@ -457,58 +529,108 @@
             class:bg-gradient-to-br={!!fromResultMap.image}
             class:variant-gradient-success-warning={!!fromResultMap.image}
           >
-          {#if loadingTMDBPoster}
-            <div class="h-24 md:h-40 lg:h-48 flex justify-center items-center">
-              <Spinner />
-            </div>
-          {:else}
-            <img src={foundImageUrl} class="block w-full h-24 md:h-40 lg:h-48 object-cover rounded" alt="Found poster"/>
-          {/if}
+            {#if loadingTMDBPoster}
+              <div
+                class="h-24 md:h-40 lg:h-48 flex justify-center items-center"
+              >
+                <Spinner />
+              </div>
+            {:else}
+              <img
+                src={foundImageUrl}
+                class="block w-full h-24 md:h-40 lg:h-48 object-cover rounded"
+                alt="Found poster"
+              />
+            {/if}
           </a>
-          {/if}
+        {/if}
       </div>
       <label class="label">
         <span>Image (optional)</span>
-        <input 
+        <input
           disabled={formDisabled}
           accept=".png, .jpg, .jpeg"
           on:change={handleImageInputChange}
-          name="image" 
-          class="input"  
-          type="file" 
+          name="image"
+          class="input"
+          type="file"
         />
       </label>
       <label class="label">
         <span>Release date (optional)</span>
-        <input 
+        <input
           on:input={handleFindableInputChange}
           disabled={formDisabled}
           accept=".png, .jpg, .jpeg"
-          name="release_date" 
-          class="input"  
-          class:bg-gradient-to-br={fromResultMap['release_date']}
-          class:variant-gradient-success-warning={fromResultMap['release_date']}
-          type="date" 
+          name="release_date"
+          class="input"
+          class:bg-gradient-to-br={fromResultMap["release_date"]}
+          class:variant-gradient-success-warning={fromResultMap["release_date"]}
+          type="date"
         />
       </label>
+
+      <!-- svelte-ignore a11y-label-has-associated-control -->
+      <label class="label">
+        <span>Tags (optional)</span>
+        <div class="alert variant-ghost">
+          <div class="alert-message">
+            <div class="flex items-center overflow-auto pb-2 status-scroll">
+              {#if tags.length}
+                {#each tags as tag}
+                  <div
+                    on:click={() => addTag(tag.id)}
+                    class={`mr-2 badge cursor-pointer ${tag.class}`}
+                    class:hidden={!!tagsMap[tag.id]}
+                  >
+                    {tag.text}
+                  </div>
+                {/each}
+              {/if}
+            </div>
+          </div>
+        </div>
+      </label>
+      <div class="flex items-center overflow-auto pb-2 status-scroll">
+        {#if tagsIdsValue.length}
+          {#each tagsIdsValue as tagId}
+            <div
+              on:click={() => {}}
+              class={`mr-2 badge cursor-pointer ${tagsMap[tagId].class}`}
+            >
+              {tagsMap[tagId].text}
+            </div>
+          {/each}
+        {/if}
+      </div>
       {#if !!$data.tmdbId}
         <label class="flex items-center space-x-2">
-          <input disabled={formDisabled} name="associate_with_result" type="checkbox" class="checkbox">
+          <input
+            disabled={formDisabled}
+            name="associate_with_result"
+            type="checkbox"
+            class="checkbox"
+          />
           <p>Associate this piece with latest set result from TMDB</p>
         </label>
       {/if}
       <footer class="modal-footer {parent.regionFooter} justify-between">
-          <!-- <button class="btn {parent.buttonNeutral}" on:click={parent.onClose}>{parent.buttonTextCancel}</button> -->
-          <button disabled={formDisabled} type="button" on:click={() => close()}>close</button>
-          <button disabled={formDisabled} class="btn {parent.buttonPositive}" type="submit">
-            {#if submittingPiece}
-              <Spinner forButton />
-            {:else}
-              { pieceToEdit ? "Update" : "Create" }
-            {/if}
-          </button>
+        <!-- <button class="btn {parent.buttonNeutral}" on:click={parent.onClose}>{parent.buttonTextCancel}</button> -->
+        <button disabled={formDisabled} type="button" on:click={() => close()}
+          >close</button
+        >
+        <button
+          disabled={formDisabled}
+          class="btn {parent.buttonPositive}"
+          type="submit"
+        >
+          {#if submittingPiece}
+            <Spinner forButton />
+          {:else}
+            {pieceToEdit ? "Update" : "Create"}
+          {/if}
+        </button>
       </footer>
     </form>
-		
-	</div>
+  </div>
 {/if}
