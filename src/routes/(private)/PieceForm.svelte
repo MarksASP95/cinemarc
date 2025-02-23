@@ -25,7 +25,7 @@
     TMDBTVSearchOutputResult,
   } from "../../models/tmdb.model";
   import { type TagDocument } from "../../models/tag.model";
-  import { buildRecord } from "../../utils/object.util";
+  import { buildFixedValueRecord, buildRecord } from "../../utils/object.util";
 
   export let parent: any;
   export let success: Function;
@@ -34,7 +34,11 @@
   export let tags: TagDocument[];
 
   let tagsMap: Record<string, TagDocument> = buildRecord(tags, "id");
-  let selectedTagsMap: Record<string, boolean> = {};
+  let selectedTagsMap: Record<string, boolean> = buildFixedValueRecord(
+    tags,
+    "id",
+    false
+  );
 
   let formErrors: Record<string, string> = {};
   let submittingPiece = false;
@@ -98,8 +102,12 @@
     data,
     setFields,
     addField,
+    unsetField,
+    // setInitialValues,
   } = createForm({
     onSubmit: (values) => {
+      // console.log(values);
+      
       const {
         name,
         description,
@@ -174,6 +182,10 @@
       console.log("Error was", e);
     },
   });
+
+  // setInitialValues({
+  //   source: "unknown",
+  // });
 
   onMount(() => {
     if (!!pieceToEdit) {
@@ -353,7 +365,12 @@
 
   function addTag(tagId: string) {
     addField(`tagsIds.${tagsIdsValue.length}`, tagId);
-    console.log(getValue($data, "tagsIds"));
+    selectedTagsMap[tagId] = true;
+  }
+
+  function removeTag(tagId: string, tagIdx: number) {
+    unsetField(`tagsIds.${tagIdx}`);
+    selectedTagsMap[tagId] = false;
   }
 
   const cBase = "card p-4 w-modal shadow-xl space-y-4 overflow-auto";
@@ -581,7 +598,7 @@
                   <div
                     on:click={() => addTag(tag.id)}
                     class={`mr-2 badge cursor-pointer ${tag.class}`}
-                    class:hidden={!!tagsMap[tag.id]}
+                    class:hidden={!!selectedTagsMap[tag.id]}
                   >
                     {tag.text}
                   </div>
@@ -593,9 +610,9 @@
       </label>
       <div class="flex items-center overflow-auto pb-2 status-scroll">
         {#if tagsIdsValue.length}
-          {#each tagsIdsValue as tagId}
+          {#each tagsIdsValue as tagId, i}
             <div
-              on:click={() => {}}
+              on:click={() => removeTag(tagId, i)}
               class={`mr-2 badge cursor-pointer ${tagsMap[tagId].class}`}
             >
               {tagsMap[tagId].text}

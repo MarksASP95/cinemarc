@@ -256,6 +256,7 @@
       props: {
         success: handleFormCreateSuccess,
         close: onCloseModalClick,
+        tags,
       },
     };
     const formModal: ModalSettings = {
