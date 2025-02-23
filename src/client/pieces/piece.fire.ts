@@ -23,7 +23,6 @@ import { firestore } from "../../store/firebase-firestore.store";
 import { type TagDocument } from "../../models/tag.model";
 
 function getTagsCol(userId: string) {
-  console.log("path", `users.${userId}.tags`);
   return collection(
     firestore(),
     `users/${userId}/tags`
