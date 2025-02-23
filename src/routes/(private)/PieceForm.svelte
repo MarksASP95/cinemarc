@@ -107,7 +107,7 @@
   } = createForm({
     onSubmit: (values) => {
       // console.log(values);
-      
+
       const {
         name,
         description,
@@ -201,6 +201,7 @@
       setFields("tagsIds", !!pieceToEdit.tagsIds);
     } else {
       setFields("associate_with_result", true);
+      setFields("source", "unknown");
     }
   });
 
