@@ -14,9 +14,6 @@
     "test:integration": "playwright test",
     "test:unit": "vitest"
   },
-  "engines": {
-    "node": "24.x" 
-  },
   "devDependencies": {
     "@playwright/test": "^1.28.1",
     "@skeletonlabs/skeleton": "^1.9.0",
